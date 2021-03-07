@@ -1,8 +1,8 @@
 package com.monumenta.rl2.objects;
 
 import com.monumenta.rl2.enums.Biome;
+
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class Door extends RoomObject {

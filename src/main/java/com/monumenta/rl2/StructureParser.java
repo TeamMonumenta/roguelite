@@ -1,11 +1,18 @@
 package com.monumenta.rl2;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+
+import com.google.gson.GsonBuilder;
 import com.monumenta.rl2.enums.Biome;
 import com.monumenta.rl2.enums.RoomType;
 import com.monumenta.rl2.objects.Door;
 import com.monumenta.rl2.objects.LootChest;
 import com.monumenta.rl2.objects.Objective;
 import com.monumenta.rl2.objects.Room;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,11 +26,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
 
 public class StructureParser {
 
@@ -72,7 +74,7 @@ public class StructureParser {
         f.getParentFile().mkdirs();
         try (FileWriter file = new FileWriter(f)) {
 
-            String str = this.room.toJSONObject().toJSONString();
+            String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
             file.write(str);
             file.flush();
             this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
@@ -245,7 +247,7 @@ public class StructureParser {
         this.room.getDoorList().add(d);
 
     }
-    
+
     private void parseAndSetBaseCoords() {
         // read the commands argument
         this.lowLoc.setX(Integer.parseInt(this.commandArgs[2]));

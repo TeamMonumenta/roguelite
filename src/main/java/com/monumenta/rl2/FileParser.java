@@ -45,7 +45,7 @@ public class FileParser {
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (JsonParseException e) {
-                            System.out.println("JSON Parser crashed for file " + fileName);
+                            System.out.println("Json Parser crashed for file " + fileName);
                             throw e;
                         }
                     }

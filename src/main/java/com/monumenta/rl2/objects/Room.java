@@ -1,12 +1,13 @@
 package com.monumenta.rl2.objects;
 
+import java.util.ArrayList;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.monumenta.rl2.enums.RoomType;
+
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import java.util.ArrayList;
 
 public class Room {
     private String path;
@@ -145,35 +146,35 @@ public class Room {
 
     // methods
 
-    public JSONObject toJSONObject() {
-        JSONObject room = new JSONObject();
-        JSONObject size = new JSONObject();
-        JSONArray doors = new JSONArray();
-        JSONArray objectives = new JSONArray();
-        JSONArray chests = new JSONArray();
+    public JsonObject toJsonObject() {
+        JsonObject room = new JsonObject();
+        JsonObject size = new JsonObject();
+        JsonArray doors = new JsonArray();
+        JsonArray objectives = new JsonArray();
+        JsonArray chests = new JsonArray();
 
         Vector roomSize = this.getSize();
-        size.put("x", roomSize.getBlockX());
-        size.put("y", roomSize.getBlockY());
-        size.put("z", roomSize.getBlockZ());
+        size.addProperty("x", roomSize.getBlockX());
+        size.addProperty("y", roomSize.getBlockY());
+        size.addProperty("z", roomSize.getBlockZ());
 
         for (Door d : doorList) {
-            doors.add(d.toJSONObject());
+            doors.add(d.toJsonObject());
         }
         for (Objective o : objectiveList) {
-            objectives.add(o.toJSONObject());
+            objectives.add(o.toJsonObject());
         }
         for (LootChest c : lootChestList) {
-            chests.add(c.toJSONObject());
+            chests.add(c.toJsonObject());
         }
 
-        room.put("path", this.path);
-        room.put("size", size);
-        room.put("type", this.type.name());
-        room.put("weight", this.weight);
-        room.put("doors", doors);
-        room.put("objectives", objectives);
-        room.put("chests", chests);
+        room.addProperty("path", this.path);
+        room.add("size", size);
+        room.addProperty("type", this.type.name());
+        room.addProperty("weight", this.weight);
+        room.add("doors", doors);
+        room.add("objectives", objectives);
+        room.add("chests", chests);
         return room;
     }
 }

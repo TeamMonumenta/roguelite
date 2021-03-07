@@ -1,10 +1,11 @@
 package com.monumenta.rl2.objects;
 
+import com.google.gson.JsonObject;
 import com.monumenta.rl2.enums.Biome;
+
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
-import org.json.simple.JSONObject;
 
 public class RoomObject {
     // direction the object is facing
@@ -79,14 +80,14 @@ public class RoomObject {
 
     // methods
 
-    public JSONObject toJSONObject() {
-        JSONObject out = new JSONObject();
+    public JsonObject toJsonObject() {
+        JsonObject out = new JsonObject();
         Vector rp = this.getRelPos();
-        out.put("x", rp.getBlockX());
-        out.put("y", rp.getBlockY());
-        out.put("z", rp.getBlockZ());
-        out.put("biome", this.getBiome().toString());
-        out.put("dir", this.getDirection().toString());
+        out.addProperty("x", rp.getBlockX());
+        out.addProperty("y", rp.getBlockY());
+        out.addProperty("z", rp.getBlockZ());
+        out.addProperty("biome", this.getBiome().toString());
+        out.addProperty("dir", this.getDirection().toString());
         return out;
     }
 
