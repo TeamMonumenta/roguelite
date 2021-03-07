@@ -1,16 +1,20 @@
 package com.monumenta.roguelite;
 
+import java.util.ArrayList;
+
 import com.monumenta.roguelite.objects.Dungeon;
 import com.monumenta.roguelite.objects.DungeonReader;
 import com.monumenta.roguelite.objects.Room;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.command.*;
+import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import java.util.ArrayList;
 
 public class RL2Command implements CommandExecutor {
 

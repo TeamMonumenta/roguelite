@@ -2,15 +2,12 @@ package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.data.Directional;
-import org.bukkit.entity.EnderCrystal;
 import org.bukkit.util.Vector;
 
 public class LootChest extends RoomObject {
