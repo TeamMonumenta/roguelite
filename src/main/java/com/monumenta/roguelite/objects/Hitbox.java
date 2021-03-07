@@ -7,7 +7,7 @@ public class Hitbox {
     private Vector pos1;
     private Vector pos2;
 
-    public Hitbox(Location p1, Location p2){
+    public Hitbox(Location p1, Location p2) {
         this.pos1 = new Vector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ());
         this.pos2 = new Vector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ());
     }
@@ -18,7 +18,7 @@ public class Hitbox {
         this.pos2 = new Vector(tmp.getBlockX(), tmp.getBlockY(), tmp.getBlockZ());
     }
 
-    public boolean CollidesWith(Hitbox other) {
+    public boolean collidesWith(Hitbox other) {
         //test collision between the two hitboxes
         boolean collision = true &&
                 (this.pos1.getBlockX() + 1 <= other.pos2.getBlockX() && this.pos2.getBlockX() - 1 >= other.pos1.getBlockX()) &&
@@ -36,7 +36,7 @@ public class Hitbox {
     }
 
     public Hitbox incremToPostPlacing() {
-        Vector v = new Vector(2, 0 ,2);
+        Vector v = new Vector(2, 0, 2);
         this.pos1.subtract(v);
         this.pos2.add(v);
         return this;

@@ -41,8 +41,7 @@ public class FileParser {
                 for (File file : subfolder.listFiles()) {
                     if (file.isFile()) {
                         String fileName = file.getPath();
-                        try (FileReader reader = new FileReader(fileName))
-                        {
+                        try (FileReader reader = new FileReader(fileName)) {
                             outLog.append(file.getName());
                             out.add(parseFile(jsonParser.parse(reader)));
                             outLog.append(" | ");

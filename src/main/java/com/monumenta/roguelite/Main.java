@@ -10,6 +10,7 @@ public class Main extends JavaPlugin {
         PluginInstance = this;
         this.getCommand("roguelite").setExecutor(new RL2Command(this));
     }
+
     public void onDisable() {
 
     }

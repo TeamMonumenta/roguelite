@@ -79,7 +79,7 @@ public class Dungeon {
 
         // find players that are in range for live log
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if(player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
+            if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
                 this.loggingPlayers.add(player);
             }
         }
@@ -120,8 +120,7 @@ public class Dungeon {
         this.selectObjectives();
         this.selectChests();
 
-        if (!this.isSpawnReady())
-        {
+        if (!this.isSpawnReady()) {
             this.directLog("Calculation Failed at end: " + this.calculationException.getMessage());
             throw this.calculationException;
         } else {
@@ -240,7 +239,7 @@ public class Dungeon {
             // test if that new room hitbox collides with the already spawned ones
             boolean isColliding = false;
             for (Hitbox h : this.hitboxCollection) {
-                if (testedRoom.getHitbox().CollidesWith(h)) {
+                if (testedRoom.getHitbox().collidesWith(h)) {
                     isColliding = true;
                     break;
                 }
@@ -312,7 +311,7 @@ public class Dungeon {
         for (Room r : this.unusedRoomPool) {
             if (r.getType() == type) {
                 for (Door d: r.getDoorList()) {
-                    if (d.CorrespondsTo(direction, biome)) {
+                    if (d.correspondsTo(direction, biome)) {
                         out.add(d);
                     }
                 }
@@ -384,7 +383,7 @@ public class Dungeon {
     private void openFirstPath() {
         Location l = this.centerLoc.clone().add(0, 7, 2);
         try {
-            Bukkit.getScheduler().callSyncMethod( this.plugin, new Callable<Integer>() {
+            Bukkit.getScheduler().callSyncMethod(this.plugin, new Callable<Integer>() {
                 @Override
                 public Integer call() {
                     l.getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
@@ -413,8 +412,9 @@ public class Dungeon {
                 o.spawnObjective();
             }
             Thread.sleep(200);
-        } catch (Exception e) {}
+        } catch (Exception e) {
 
+		}
     }
 
     private void spawnChests() {
@@ -431,17 +431,20 @@ public class Dungeon {
                 c.spawnAir();
             }
             Thread.sleep(500);
-        } catch (Exception e) { }
+        } catch (Exception e) {
 
-    };
+		}
+    }
 
     private void spawnRoomList(ArrayList<Room> rooms) {
-        if (rooms == null) { return; }
+        if (rooms == null) {
+			return;
+		}
         this.directLog("Spawning " + rooms.size() + " rooms of type " + rooms.get(0).getType().name());
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
         for (Room r : rooms) {
             try {
-                Bukkit.getScheduler().callSyncMethod( this.plugin, () -> Bukkit.dispatchCommand( sender, r.getLoadStructureCommand() ) ).get();
+                Bukkit.getScheduler().callSyncMethod(this.plugin, () -> Bukkit.dispatchCommand(sender, r.getLoadStructureCommand())).get();
                 Thread.sleep((int)r.getSize().length());
             } catch (Exception e) {
 
@@ -450,7 +453,9 @@ public class Dungeon {
     }
 
     private void directLog(String str) {
-        if (!doDirectLog) {return;}
+        if (!doDirectLog) {
+			return;
+		}
         for (Player player : this.loggingPlayers) {
             player.sendMessage(ChatColor.AQUA + str);
         }

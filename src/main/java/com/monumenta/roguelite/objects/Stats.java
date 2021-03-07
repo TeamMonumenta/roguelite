@@ -91,7 +91,7 @@ public class Stats {
                 this.spawnedChestsNormal.getOrDefault(c.getBiome(), 0));
     }
 
-    public void addToRoomTotal(int amount){
+    public void addToRoomTotal(int amount) {
         this.roomTotal += amount;
     }
 

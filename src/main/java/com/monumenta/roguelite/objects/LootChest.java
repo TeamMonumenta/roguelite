@@ -47,7 +47,7 @@ public class LootChest extends RoomObject {
                         ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
                 return null;
-            } ).get();
+            }).get();
             Thread.sleep(10);
         } catch (Exception e) {
 
@@ -61,7 +61,7 @@ public class LootChest extends RoomObject {
                 block.setType(Material.AIR);
                 block.getRelative(0, 1, 0).setType(Material.AIR);
                 return null;
-            } ).get();
+            }).get();
             Thread.sleep(10);
         } catch (Exception e) {
 

@@ -36,7 +36,7 @@ public class RL2Command implements CommandExecutor {
     }
 
     private static Location getSenderLocation(CommandSender sender) {
-        if (sender instanceof BlockCommandSender){
+        if (sender instanceof BlockCommandSender) {
             return ((BlockCommandSender) sender).getBlock().getLocation();
         }
         if (sender instanceof Player) {

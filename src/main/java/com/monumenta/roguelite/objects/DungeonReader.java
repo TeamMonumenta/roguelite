@@ -232,7 +232,7 @@ public class DungeonReader {
                     if (presence < goalValue - maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);
                         this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int)(roomWeight * (1 - (presence - goalValue) / 100))));
-                    } else if (presence > goalValue + maxDiffFromGoal){
+                    } else if (presence > goalValue + maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too High %+.1f !!!", presence - goalValue);
                         this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int)(roomWeight * (1 - (presence - goalValue) / 100))));
                     }

@@ -34,7 +34,7 @@ public class Objective extends RoomObject {
                 this.getLocation().getBlock().setType(Material.AIR);
                 loc.getWorld().spawn(loc, EnderCrystal.class);
                 return null;
-            } ).get();
+            }).get();
             Thread.sleep(100);
         } catch (Exception ignored) {
 
@@ -60,7 +60,7 @@ public class Objective extends RoomObject {
                         ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
                 return null;
-            } ).get();
+            }).get();
             Thread.sleep(10);
         } catch (Exception ignored) {
 

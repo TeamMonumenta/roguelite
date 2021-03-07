@@ -43,7 +43,7 @@ public class Door extends RoomObject {
         this.parentRoom = parentRoom;
     }
 
-    public boolean CorrespondsTo(BlockFace direction, Biome biome) {
+    public boolean correspondsTo(BlockFace direction, Biome biome) {
         boolean directionMatch = this.getDirection().getOppositeFace() == direction;
         boolean biomeMatch = biome == Biome.ANY || this.getBiome() == Biome.ANY || biome == this.getBiome();
         return directionMatch && biomeMatch;
