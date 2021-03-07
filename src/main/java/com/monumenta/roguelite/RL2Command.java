@@ -1,8 +1,8 @@
-package com.monumenta.rl2;
+package com.monumenta.roguelite;
 
-import com.monumenta.rl2.objects.Dungeon;
-import com.monumenta.rl2.objects.DungeonReader;
-import com.monumenta.rl2.objects.Room;
+import com.monumenta.roguelite.objects.Dungeon;
+import com.monumenta.roguelite.objects.DungeonReader;
+import com.monumenta.roguelite.objects.Room;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

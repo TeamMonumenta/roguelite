@@ -1,10 +1,10 @@
-package com.monumenta.rl2.objects;
+package com.monumenta.roguelite.objects;
 
 import java.util.ArrayList;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.monumenta.rl2.enums.RoomType;
+import com.monumenta.roguelite.enums.RoomType;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;

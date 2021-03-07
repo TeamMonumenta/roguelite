@@ -1,4 +1,4 @@
-package com.monumenta.rl2;
+package com.monumenta.roguelite;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.gson.GsonBuilder;
-import com.monumenta.rl2.enums.Biome;
-import com.monumenta.rl2.enums.RoomType;
-import com.monumenta.rl2.objects.Door;
-import com.monumenta.rl2.objects.LootChest;
-import com.monumenta.rl2.objects.Objective;
-import com.monumenta.rl2.objects.Room;
+import com.monumenta.roguelite.enums.Biome;
+import com.monumenta.roguelite.enums.RoomType;
+import com.monumenta.roguelite.objects.Door;
+import com.monumenta.roguelite.objects.LootChest;
+import com.monumenta.roguelite.objects.Objective;
+import com.monumenta.roguelite.objects.Room;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

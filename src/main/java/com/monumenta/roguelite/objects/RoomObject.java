@@ -1,7 +1,7 @@
-package com.monumenta.rl2.objects;
+package com.monumenta.roguelite.objects;
 
 import com.google.gson.JsonObject;
-import com.monumenta.rl2.enums.Biome;
+import com.monumenta.roguelite.enums.Biome;
 
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;

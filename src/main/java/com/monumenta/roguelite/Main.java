@@ -1,4 +1,4 @@
-package com.monumenta.rl2;
+package com.monumenta.roguelite;
 
 import org.bukkit.plugin.java.JavaPlugin;
 

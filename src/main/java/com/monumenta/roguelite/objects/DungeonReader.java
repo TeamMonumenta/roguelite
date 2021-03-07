@@ -1,8 +1,8 @@
-package com.monumenta.rl2.objects;
+package com.monumenta.roguelite.objects;
 
-import com.monumenta.rl2.enums.Biome;
-import com.monumenta.rl2.enums.DungeonStatus;
-import com.monumenta.rl2.enums.RoomType;
+import com.monumenta.roguelite.enums.Biome;
+import com.monumenta.roguelite.enums.DungeonStatus;
+import com.monumenta.roguelite.enums.RoomType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;

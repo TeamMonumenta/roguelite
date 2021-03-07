@@ -1,60 +1,50 @@
-package com.monumenta.rl2.objects;
+package com.monumenta.roguelite.objects;
 
-
-import com.monumenta.rl2.Main;
-import com.monumenta.rl2.enums.Biome;
+import com.monumenta.roguelite.Main;
+import com.monumenta.roguelite.enums.Biome;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.util.Vector;
 
-public class Objective extends RoomObject {
+public class LootChest extends RoomObject {
 
     // basic constructor with default values
-    public Objective() {
+    public LootChest() {
         super();
     }
 
     // basic constructor with given RoomObject values
-    public Objective(BlockFace direction, Biome biome, Vector relPos) {
+    public LootChest(BlockFace direction, Biome biome, Vector relPos) {
         super(direction, biome, relPos);
     }
 
     // copy constructor
-    public Objective(Objective old) {
+    public LootChest(LootChest old) {
         super(old);
-    }
-
-    public void spawnObjective() {
-        try {
-            Bukkit.getScheduler().callSyncMethod(Main.getInstance(), () -> {
-                Location loc = this.getLocation().clone().add(0.5, 1, 0.5);
-                this.getLocation().getBlock().setType(Material.AIR);
-                loc.getWorld().spawn(loc, EnderCrystal.class);
-                return null;
-            } ).get();
-            Thread.sleep(100);
-        } catch (Exception ignored) {
-
-        }
     }
 
     public void spawnChest() {
         try {
             Bukkit.getScheduler().callSyncMethod(Main.getInstance(), () -> {
                 Location loc = this.getLocation();
-                String table = "epic:r2/dungeons/fred/";
+                String table = "epic:r2/dungeons/fred/normal_" + this.getBiome().name().toLowerCase();
                 if (this.getBiome() == Biome.VAULT) {
-                    table += "challenge";
-                } else {
-                    table += "objective_" + this.getBiome().name().toLowerCase();
+                    table = "epic:r2/dungeons/fred/challenge";
                 }
                 String waterlogged = "false";
+                Material blockAbove = Material.AIR;
                 if (this.getBiome() == Biome.WATER) {
                     waterlogged = "true";
+                    blockAbove = Material.WATER;
                 }
+                loc.getBlock().getRelative(0,1,0).setType(blockAbove);
                 String cmd = "setblock " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() +
                         " minecraft:chest[facing=" + this.getDirection().name().toLowerCase() +
                         ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
@@ -62,7 +52,21 @@ public class Objective extends RoomObject {
                 return null;
             } ).get();
             Thread.sleep(10);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void spawnAir() {
+        try {
+            Bukkit.getScheduler().callSyncMethod(Main.getInstance(), () -> {
+                Block block = this.getLocation().getBlock();
+                block.setType(Material.AIR);
+                block.getRelative(0, 1, 0).setType(Material.AIR);
+                return null;
+            } ).get();
+            Thread.sleep(10);
+        } catch (Exception e) {
 
         }
     }
