@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sh compile.sh
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+./compile.sh
 cd "$SCRIPT_DIR/target"
 
 plugin="$(ls -r Roguelite*.jar | grep -v sources | head -n 1)"
