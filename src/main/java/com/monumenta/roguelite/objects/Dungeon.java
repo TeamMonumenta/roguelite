@@ -374,7 +374,14 @@ public class Dungeon {
         try {
             ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();
 
+            // Load main rooms
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
+
+            // Wait for all regular rooms to load before loading other types
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            futures.clear();
+
+            // Load other types of rooms
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.UTIL, null)));
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.END, null)));
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
