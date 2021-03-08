@@ -1,10 +1,12 @@
 package com.monumenta.roguelite.objects;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.monumenta.roguelite.enums.RoomType;
+import com.playmonumenta.structures.StructuresAPI;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -90,20 +92,8 @@ public class Room {
         return this.lootChestList;
     }
 
-    public String getLoadStructureCommand() {
-        StringBuilder out = new StringBuilder();
-
-        out.append("loadstructure \"");
-        out.append(this.path);
-        out.append("\" ");
-        out.append(this.location.getBlockX());
-        out.append(" ");
-        out.append(this.location.getBlockY());
-        out.append(" ");
-        out.append(this.location.getBlockZ());
-        out.append(" true");
-
-        return out.toString();
+    public CompletableFuture<Void> loadStructureAsync() {
+        return StructuresAPI.loadStructureAsync(this.path, this.location, true);
     }
 
     // setters

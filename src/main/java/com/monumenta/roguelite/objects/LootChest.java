@@ -1,6 +1,5 @@
 package com.monumenta.roguelite.objects;
 
-import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
 
 import org.bukkit.Bukkit;
@@ -28,43 +27,27 @@ public class LootChest extends RoomObject {
     }
 
     public void spawnChest() {
-        try {
-            Bukkit.getScheduler().callSyncMethod(Main.getInstance(), () -> {
-                Location loc = this.getLocation();
-                String table = "epic:r2/dungeons/fred/normal_" + this.getBiome().name().toLowerCase();
-                if (this.getBiome() == Biome.VAULT) {
-                    table = "epic:r2/dungeons/fred/challenge";
-                }
-                String waterlogged = "false";
-                Material blockAbove = Material.AIR;
-                if (this.getBiome() == Biome.WATER) {
-                    waterlogged = "true";
-                    blockAbove = Material.WATER;
-                }
-                loc.getBlock().getRelative(0,1,0).setType(blockAbove);
-                String cmd = "setblock " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() +
-                        " minecraft:chest[facing=" + this.getDirection().name().toLowerCase() +
-                        ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
-                return null;
-            }).get();
-            Thread.sleep(10);
-        } catch (Exception e) {
-
+        Location loc = this.getLocation();
+        String table = "epic:r2/dungeons/fred/normal_" + this.getBiome().name().toLowerCase();
+        if (this.getBiome() == Biome.VAULT) {
+            table = "epic:r2/dungeons/fred/challenge";
         }
+        String waterlogged = "false";
+        Material blockAbove = Material.AIR;
+        if (this.getBiome() == Biome.WATER) {
+            waterlogged = "true";
+            blockAbove = Material.WATER;
+        }
+        loc.getBlock().getRelative(0, 1, 0).setType(blockAbove);
+        String cmd = "setblock " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() +
+                " minecraft:chest[facing=" + this.getDirection().name().toLowerCase() +
+                ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
     }
 
     public void spawnAir() {
-        try {
-            Bukkit.getScheduler().callSyncMethod(Main.getInstance(), () -> {
-                Block block = this.getLocation().getBlock();
-                block.setType(Material.AIR);
-                block.getRelative(0, 1, 0).setType(Material.AIR);
-                return null;
-            }).get();
-            Thread.sleep(10);
-        } catch (Exception e) {
-
-        }
+        Block block = this.getLocation().getBlock();
+        block.setType(Material.AIR);
+        block.getRelative(0, 1, 0).setType(Material.AIR);
     }
 }

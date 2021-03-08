@@ -3,7 +3,6 @@ package com.monumenta.roguelite;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 
 import com.google.gson.GsonBuilder;
 import com.monumenta.roguelite.enums.Biome;
@@ -12,8 +11,8 @@ import com.monumenta.roguelite.objects.Door;
 import com.monumenta.roguelite.objects.LootChest;
 import com.monumenta.roguelite.objects.Objective;
 import com.monumenta.roguelite.objects.Room;
+import com.playmonumenta.structures.StructuresAPI;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -62,10 +61,15 @@ public class StructureParser {
         this.parseAndSetBaseCoords();
         this.parser();
         this.fullRoomName = this.room.getType().name() + "/" + this.commandArgs[1];
-        this.writeRoomToFile();
+        try {
+            this.writeRoomToFile();
+        } catch (Exception e) {
+            this.sender.sendMessage(ChatColor.RED + "Failed to save: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void writeRoomToFile() {
+    private void writeRoomToFile() throws Exception {
         String path =  "roguelite/" + this.fullRoomName;
         this.saveStructure(path);
         this.room.setPath(path);
@@ -79,13 +83,12 @@ public class StructureParser {
             file.flush();
             this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw(e);
         }
     }
 
-    private void saveStructure(String path) {
-        String cmd = "savestructure \"" + path + "\" " + String.join(" ", Arrays.copyOfRange(this.commandArgs, 2, 8));
-        Bukkit.getServer().dispatchCommand(this.sender, cmd);
+    private void saveStructure(String path) throws Exception {
+        StructuresAPI.save(path, this.lowLoc, this.highLoc);
     }
 
     private void parser() {
@@ -135,6 +138,9 @@ public class StructureParser {
             case BLACK_GLAZED_TERRACOTTA:
                 this.parseRoomType(block);
                 break;
+            default:
+                // Other blocks have no significance
+                break;
         }
     }
 
@@ -173,6 +179,9 @@ public class StructureParser {
                 break;
             case BLACK_GLAZED_TERRACOTTA:
                 this.room.setWeight(this.room.getWeight() + 10000);
+                break;
+            default:
+                // Other blocks have no significance
                 break;
         }
     }
@@ -309,6 +318,9 @@ public class StructureParser {
                 return Biome.CITY;
             case YELLOW_STAINED_GLASS:
                 return Biome.VAULT;
+            default:
+                // Other blocks have no significance
+                break;
         }
         return Biome.NONE;
     }

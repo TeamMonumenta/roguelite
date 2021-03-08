@@ -2,10 +2,12 @@ package com.monumenta.roguelite.objects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
+import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.Utils;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.Config;
@@ -17,7 +19,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -368,94 +369,89 @@ public class Dungeon {
             }
             roomMap.get(r.getType()).add(r);
         }
+
         // spawn things
-        this.spawnRoomList(roomMap.getOrDefault(RoomType.NORMAL, null));
-        this.spawnObjectives();
-        this.spawnRoomList(roomMap.getOrDefault(RoomType.UTIL, null));
-        this.spawnRoomList(roomMap.getOrDefault(RoomType.END, null));
-        this.spawnRoomList(roomMap.getOrDefault(RoomType.DEADEND, null));
-        this.spawnChests();
-        this.openFirstPath();
-        this.directLog("Done.");
+        try {
+            ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.UTIL, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.END, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
+
+            // Wait for all rooms to finish spawning
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+
+            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+                this.spawnObjectives();
+                this.spawnChests();
+                this.openFirstPath();
+                this.directLog("Done.");
+            });
+        } catch (Exception ex) {
+            this.directLog("Failed to generate instance: " + ex.getMessage());
+            ex.printStackTrace();
+        }
         this.status = DungeonStatus.SPAWNED;
     }
 
     private void openFirstPath() {
         Location l = this.centerLoc.clone().add(0, 7, 2);
-        try {
-            Bukkit.getScheduler().callSyncMethod(this.plugin, new Callable<Integer>() {
-                @Override
-                public Integer call() {
-                    l.getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(0, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(0, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(0, 2, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(-1, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(-1, 0, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(-1, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(1, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(1, 0, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    l.clone().add(1, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
-                    return 1;
-                }
-            }).get();
-        } catch (Exception e) {
-
-        }
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            l.getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(0, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(0, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(0, 2, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(-1, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(-1, 0, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(-1, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(1, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(1, 0, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+            l.clone().add(1, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
+        });
     }
 
     private void spawnObjectives() {
-        try {
-            Thread.sleep(500);
-            this.directLog("Spawning objectives");
-            for (Objective o : this.selectedObjectives) {
-                o.spawnObjective();
-            }
-            Thread.sleep(200);
-        } catch (Exception e) {
-
-		}
+        this.directLog("Spawning objectives");
+        for (Objective o : this.selectedObjectives) {
+            o.spawnObjective();
+        }
     }
 
     private void spawnChests() {
-        try {
-            Thread.sleep(500);
-            this.directLog("Spawning chests");
-            for (Objective o : this.objectivePotentialSpawnPoints) {
-                o.spawnChest();
-            }
-            for (LootChest c : this.selectedLootChests) {
-                c.spawnChest();
-            }
-            for (LootChest c : this.lootChestPotentialSpawnPoints) {
-                c.spawnAir();
-            }
-            Thread.sleep(500);
-        } catch (Exception e) {
-
-		}
+        this.directLog("Spawning chests");
+        for (Objective o : this.objectivePotentialSpawnPoints) {
+            o.spawnChest();
+        }
+        for (LootChest c : this.selectedLootChests) {
+            c.spawnChest();
+        }
+        for (LootChest c : this.lootChestPotentialSpawnPoints) {
+            c.spawnAir();
+        }
     }
 
-    private void spawnRoomList(ArrayList<Room> rooms) {
+    private List<CompletableFuture<Void>> beginSpawningRoomList(ArrayList<Room> rooms) {
         if (rooms == null) {
-			return;
-		}
+            return new ArrayList<>(0);
+        }
         this.directLog("Spawning " + rooms.size() + " rooms of type " + rooms.get(0).getType().name());
-        ConsoleCommandSender sender = Bukkit.getConsoleSender();
+        List<CompletableFuture<Void>> futures = new ArrayList<>(rooms.size());
         for (Room r : rooms) {
+            futures.add(r.loadStructureAsync());
             try {
-                Bukkit.getScheduler().callSyncMethod(this.plugin, () -> Bukkit.dispatchCommand(sender, r.getLoadStructureCommand())).get();
-                Thread.sleep((int)r.getSize().length());
+                Thread.sleep(25);
             } catch (Exception e) {
-
+                continue;
             }
         }
+        return futures;
     }
 
     private void directLog(String str) {
         if (!doDirectLog) {
-			return;
-		}
+            return;
+        }
         for (Player player : this.loggingPlayers) {
             player.sendMessage(ChatColor.AQUA + str);
         }

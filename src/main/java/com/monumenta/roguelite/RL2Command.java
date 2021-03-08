@@ -61,11 +61,11 @@ public class RL2Command implements CommandExecutor {
                 this.rl2Help(sender);
                 return true;
             case "generate":
-                Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, () -> {
+                Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
                     Dungeon dungeon = new Dungeon(this.rooms, loc, this.plugin, true);
                     dungeon.calculateWithRetries(5);
                     dungeon.spawn();
-                }, 0);
+                });
 
                 return true;
             case "savestructure":
@@ -86,13 +86,15 @@ public class RL2Command implements CommandExecutor {
                     force = true;
                 }
                 boolean finalForce = force;
-                Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, () -> {
+                Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
                     DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
                     reader.read(Integer.parseInt(args[1]), finalForce);
                     reader.output();
-                }, 0);
+                });
                 return true;
+			default:
+                sender.sendMessage("Unknown command: " + args[0]);
+                return false;
         }
-        return false;
     }
 }
