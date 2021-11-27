@@ -12,5 +12,5 @@ fi
 
 echo "Plugin version: $plugin"
 
-scp -P 9922 $plugin epic@admin.playmonumenta.com:/home/epic/stage/project_epic/server_config/plugins
-ssh -p 9922 epic@admin.playmonumenta.com "cd /home/epic/stage/project_epic/server_config/plugins && rm -f Roguelite.jar ; ln -s $plugin Roguelite.jar"
+scp -P 9922 $plugin epic@admin.playmonumenta.com:/home/epic/stage/m12/server_config/plugins
+ssh -p 9922 epic@admin.playmonumenta.com "cd /home/epic/stage/m12/server_config/plugins && rm -f Roguelite.jar ; ln -s $plugin Roguelite.jar"
