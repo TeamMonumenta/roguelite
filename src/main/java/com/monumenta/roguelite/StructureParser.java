@@ -88,7 +88,7 @@ public class StructureParser {
     }
 
     private void saveStructure(String path) throws Exception {
-        StructuresAPI.save(path, this.lowLoc, this.highLoc);
+        StructuresAPI.copyAreaAndSaveStructure(path, this.lowLoc, this.highLoc).get();
     }
 
     private void parser() {

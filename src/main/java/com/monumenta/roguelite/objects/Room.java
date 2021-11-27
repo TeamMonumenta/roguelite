@@ -93,7 +93,7 @@ public class Room {
     }
 
     public CompletableFuture<Void> loadStructureAsync() {
-        return StructuresAPI.loadStructureAsync(this.path, this.location, true);
+        return StructuresAPI.loadAndPasteStructure(this.path, this.location, true);
     }
 
     // setters
