@@ -61,34 +61,33 @@ public class StructureParser {
         this.parseAndSetBaseCoords();
         this.parser();
         this.fullRoomName = this.room.getType().name() + "/" + this.commandArgs[1];
-        try {
-            this.writeRoomToFile();
-        } catch (Exception e) {
-            this.sender.sendMessage(ChatColor.RED + "Failed to save: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
-    private void writeRoomToFile() throws Exception {
+        // Save the room
         String path =  "roguelite/" + this.fullRoomName;
-        this.saveStructure(path);
-        this.room.setPath(path);
-        String filePath = this.plugin.getDataFolder().getPath() + "/rooms/" + this.fullRoomName + ".json";
-        File f = new File(filePath);
-        f.getParentFile().mkdirs();
-        try (FileWriter file = new FileWriter(f)) {
-
-            String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
-            file.write(str);
-            file.flush();
-            this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
-        } catch (IOException e) {
-            throw(e);
-        }
-    }
-
-    private void saveStructure(String path) throws Exception {
-        StructuresAPI.copyAreaAndSaveStructure(path, this.lowLoc, this.highLoc).get();
+        // Start saving, and then run actions when complete
+        StructuresAPI.copyAreaAndSaveStructure(path, this.lowLoc, this.highLoc).whenComplete((unused, ex) -> {
+            // Saving complete
+            if (ex != null) {
+                // Completed with an error
+                this.sender.sendMessage(ChatColor.RED + "Failed to save: " + ex.getMessage());
+                ex.printStackTrace();
+            } else {
+                // Completed successfully
+                this.room.setPath(path);
+                String filePath = this.plugin.getDataFolder().getPath() + "/rooms/" + this.fullRoomName + ".json";
+                File f = new File(filePath);
+                f.getParentFile().mkdirs();
+                try (FileWriter file = new FileWriter(f)) {
+                    String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
+                    file.write(str);
+                    file.flush();
+                    this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
+                } catch (IOException e) {
+                    this.sender.sendMessage(ChatColor.RED + "Failed to save JSON: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void parser() {
