@@ -41,7 +41,7 @@ public class StructureParser {
     StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String[] args) {
         this.plugin = plug;
         this.sender = sender;
-        for (Player p : sender.getServer().getOnlinePlayers()) {
+        for (Player p : senderLoc.getWorld().getPlayers()) {
             if (p.getLocation().distanceSquared(senderLoc) < 100) {
                 this.sender = p;
             }

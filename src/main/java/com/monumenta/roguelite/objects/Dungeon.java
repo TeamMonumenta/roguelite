@@ -79,7 +79,7 @@ public class Dungeon {
         }
 
         // find players that are in range for live log
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : this.centerLoc.getWorld().getPlayers()) {
             if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
                 this.loggingPlayers.add(player);
             }
