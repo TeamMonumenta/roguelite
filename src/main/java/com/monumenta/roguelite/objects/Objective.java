@@ -2,7 +2,6 @@ package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.enums.Biome;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -40,13 +39,10 @@ public class Objective extends RoomObject {
         } else {
             table += "objective_" + this.getBiome().name().toLowerCase();
         }
-        String waterlogged = "false";
+        boolean waterlogged = false;
         if (this.getBiome() == Biome.WATER) {
-            waterlogged = "true";
+            waterlogged = true;
         }
-        String cmd = "setblock " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() +
-                " minecraft:chest[facing=" + this.getDirection().name().toLowerCase() +
-                ",waterlogged=" + waterlogged + "]{LootTable:\"" + table + "\"}";
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        LootChest.spawnLootChest(loc, table, this.getDirection(), waterlogged);
     }
 }
