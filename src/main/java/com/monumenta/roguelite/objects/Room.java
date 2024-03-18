@@ -1,30 +1,15 @@
 package com.monumenta.roguelite.objects;
 
-import com.fastasyncworldedit.core.extent.clipboard.DiskOptimizedClipboard;
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.monumenta.roguelite.enums.RoomType;
 import com.playmonumenta.structures.StructuresAPI;
-import com.playmonumenta.structures.StructuresPlugin;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
-import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.session.ClipboardHolder;
+
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 
 public class Room {
     private String path;
@@ -46,7 +31,6 @@ public class Room {
         this.size = old.size;
         this.location = old.location.clone();
         this.weight = old.weight;
-        this.hitbox = old.hitbox;
 
         for (LootChest c : old.lootChestList) {
             this.lootChestList.add(new LootChest(c));
@@ -108,48 +92,7 @@ public class Room {
         return this.lootChestList;
     }
 
-
-    /**
-     *  An experimental version of this. works differently than StructuresAPI. Seems to be faster and more reliable.
-     */
-    public synchronized void experimentalLoadStructure() {
-
-
-        File file = new File(Paths.get(StructuresPlugin.getInstance().getDataFolder().toString(), "structures", path + ".schematic").toString());
-
-        ClipboardFormat format = ClipboardFormats.findByAlias("sponge");
-        Clipboard newClip;
-        try {
-            newClip = format.load(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        BlockArrayClipboard clipboard;
-        if (newClip instanceof BlockArrayClipboard) {
-            clipboard = (BlockArrayClipboard)newClip;
-        } else {
-            if (!(newClip instanceof DiskOptimizedClipboard)) {
-                throw new RuntimeException();
-            }
-
-            clipboard = ((DiskOptimizedClipboard)newClip).toClipboard();
-        }
-        com.sk89q.worldedit.world.World adapted = BukkitAdapter.adapt(location.getWorld());
-        EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(adapted, -1);
-        Operation operation = new ClipboardHolder(clipboard).createPaste(session)
-                .to(BlockVector3.at(location.getX(), location.getY(), location.getZ()))
-                .copyEntities(true).copyBiomes(true).build();
-
-        try {
-            Operations.complete(operation);
-            session.flushQueue();
-        } catch (Exception e) {
-            System.out.println("Could not paste: ");
-            e.printStackTrace();
-        }
-    }
     public CompletableFuture<Void> loadStructureAsync() {
-
         return StructuresAPI.loadAndPasteStructure(this.path, this.location, true);
     }
 

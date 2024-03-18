@@ -1,6 +1,7 @@
 package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.enums.Biome;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -24,7 +25,7 @@ public class Objective extends RoomObject {
         super(old);
     }
 
-    public synchronized void spawnObjective() {
+    public void spawnObjective() {
         Location loc = this.getLocation().clone().add(0.5, 1, 0.5);
         this.getLocation().getBlock().setType(Material.AIR);
         loc.getWorld().spawn(loc, EnderCrystal.class);
@@ -38,7 +39,10 @@ public class Objective extends RoomObject {
         } else {
             table += "objective_" + this.getBiome().name().toLowerCase();
         }
-        boolean waterlogged = this.getBiome() == Biome.WATER;
+        boolean waterlogged = false;
+        if (this.getBiome() == Biome.WATER) {
+            waterlogged = true;
+        }
         LootChest.spawnLootChest(loc, table, this.getDirection(), waterlogged);
     }
 }

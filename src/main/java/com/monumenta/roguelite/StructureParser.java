@@ -1,5 +1,9 @@
 package com.monumenta.roguelite;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import com.google.gson.GsonBuilder;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.RoomType;
@@ -8,6 +12,7 @@ import com.monumenta.roguelite.objects.LootChest;
 import com.monumenta.roguelite.objects.Objective;
 import com.monumenta.roguelite.objects.Room;
 import com.playmonumenta.structures.StructuresAPI;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,21 +26,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class StructureParser {
 
-    private final Plugin plugin;
+    private Plugin plugin;
 
     private CommandSender sender;
-    private final String[] commandArgs;
+    private String[] commandArgs;
     private String fullRoomName;
-    private final Location lowLoc;
-    private final Location highLoc;
+    private Location lowLoc;
+    private Location highLoc;
 
-    private final Room room;
+    private Room room;
 
     StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String[] args) {
         this.plugin = plug;

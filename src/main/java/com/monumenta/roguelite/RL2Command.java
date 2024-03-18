@@ -1,8 +1,11 @@
 package com.monumenta.roguelite;
 
+import java.util.ArrayList;
+
 import com.monumenta.roguelite.objects.Dungeon;
 import com.monumenta.roguelite.objects.DungeonReader;
 import com.monumenta.roguelite.objects.Room;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -12,8 +15,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import java.util.ArrayList;
 
 public class RL2Command implements CommandExecutor {
 
@@ -72,7 +73,7 @@ public class RL2Command implements CommandExecutor {
                 return true;
             case "reload":
                 this.rooms = FileParser.loadFiles(this.plugin, sender);
-                sender.sendMessage(this.rooms.size() + " Files reloaded");
+                sender.sendMessage("" + this.rooms.size() + " Files reloaded");
                 return true;
             case "stats":
 
@@ -80,7 +81,11 @@ public class RL2Command implements CommandExecutor {
                     sender.sendMessage("Failed. you need to specify the amounts on dungeons to be calculated");
                     return false;
                 }
-                boolean finalForce = args.length >= 3 && args[2].equals("confirm");
+                boolean force = false;
+                if (args.length >= 3 && args[2].equals("confirm")) {
+                    force = true;
+                }
+                boolean finalForce = force;
                 Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
                     DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
                     reader.read(Integer.parseInt(args[1]), finalForce);

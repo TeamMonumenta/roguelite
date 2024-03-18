@@ -49,13 +49,6 @@
             <version>7.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/.libs/FastAsyncWorldEdit.jar</systemPath>
-        </dependency>
     </dependencies>
 
     <build>

@@ -1,11 +1,19 @@
 package com.monumenta.roguelite.objects;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.Utils;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.Config;
 import com.monumenta.roguelite.enums.DungeonStatus;
 import com.monumenta.roguelite.enums.RoomType;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,11 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 public class Dungeon {
 
@@ -84,7 +87,7 @@ public class Dungeon {
 
         // create the basic doors
         this.unusedDoorPool = new ArrayList<>();
-        this.unusedDoorPool.add(new Door(this.centerLoc.clone().add(0, 4, 3), Biome.getRandom(), BlockFace.SOUTH));
+        this.unusedDoorPool.add(new Door(this.centerLoc.clone().add(0,4,3), Biome.getRandom(), BlockFace.SOUTH));
 
         // create hitboxes
         this.hitboxCollection = new ArrayList<>();
@@ -99,10 +102,10 @@ public class Dungeon {
     }
 
     /*
-     *
-     * Calculation
-     *
-     */
+    *
+    * Calculation
+    *
+    */
 
     private Dungeon calculate() throws Exception {
         // only calculate if the dungeon is initialized
@@ -226,7 +229,7 @@ public class Dungeon {
         boolean success = false;
         Room testedRoom;
         Door testedDoor = new Door();
-        while (!compatDoors.isEmpty()) {
+        while (!success && !compatDoors.isEmpty()) {
             // get a random door
             testedDoor = Utils.getRandomDoorFromWeightedList(compatDoors);
             // get this door's room
@@ -308,7 +311,7 @@ public class Dungeon {
         ArrayList<Door> out = new ArrayList<>();
         for (Room r : this.unusedRoomPool) {
             if (r.getType() == type) {
-                for (Door d : r.getDoorList()) {
+                for (Door d: r.getDoorList()) {
                     if (d.correspondsTo(direction, biome)) {
                         out.add(d);
                     }
@@ -333,7 +336,7 @@ public class Dungeon {
                 s.append(ChatColor.RED);
                 s.append("Calculation Failed. Please contact a moderator, as our instance cannot be generated.\n");
                 s.append("Latest error:\n");
-                s.append(e);
+                s.append(e.toString());
                 s.append("\n");
                 for (StackTraceElement elem : e.getStackTrace()) {
                     s.append(elem.toString());
@@ -346,19 +349,20 @@ public class Dungeon {
         return out;
     }
 
-
     /*
-     *
-     * Spawn
-     *
-     */
-    public synchronized void spawn() {
+    *
+    * Spawn
+    *
+    */
+
+
+    public void spawn() {
         if (this.status != DungeonStatus.CALCULATED) {
             this.directLog(ChatColor.DARK_RED + "Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name());
             return;
         }
         // sort rooms of different kinds in different lists. so that their order of spawn can be chosen
-        Map<RoomType, ArrayList<Room>> roomMap = new HashMap<>();
+        Map<RoomType, ArrayList<Room>> roomMap = new HashMap<RoomType, ArrayList<Room>>();
         for (Room r : this.usedRooms) {
             if (!roomMap.containsKey(r.getType())) {
                 roomMap.put(r.getType(), new ArrayList<>());
@@ -368,27 +372,28 @@ public class Dungeon {
 
         // spawn things
         try {
-            this.directLog("Generating... This could take a while. Be patient!");
+            ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();
 
             // Load main rooms
-            this.spawnRoomListSync(roomMap.getOrDefault(RoomType.NORMAL, null));
-            ;
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
+
             // Wait for all regular rooms to load before loading other types
-            this.directLog("Main rooms spawned!");
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            futures.clear();
 
             // Load other types of rooms
-            this.directLog("Spawning Util rooms");
-            this.spawnRoomListSync(roomMap.getOrDefault(RoomType.UTIL, null));
-            this.directLog("Spawning end rooms");
-            this.spawnRoomListSync(roomMap.getOrDefault(RoomType.END, null));
-            this.directLog("Spawning dead end rooms");
-            this.spawnRoomListSync(roomMap.getOrDefault(RoomType.DEADEND, null));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.UTIL, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.END, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
+
+            // Wait for all rooms to finish spawning
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 this.spawnObjectives();
                 this.spawnChests();
-                this.directLog("Done. Forcing a world save.");
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "/save-all");
                 this.openFirstPath();
+                this.directLog("Done.");
             });
         } catch (Exception ex) {
             this.directLog("Failed to generate instance: " + ex.getMessage());
@@ -433,22 +438,21 @@ public class Dungeon {
         }
     }
 
-
-    /**
-     * There is almost no reason for this to be async.
-     * The loading itself is already hidden from the player, and async can just lead to more problems.
-     *
-     * @param rooms The rooms to load.
-     */
-    private synchronized void spawnRoomListSync(ArrayList<Room> rooms) {
+    private List<CompletableFuture<Void>> beginSpawningRoomList(ArrayList<Room> rooms) {
         if (rooms == null) {
-            this.directLog("Room list is somehow null. This is not good.");
-            throw new NullPointerException();
+            return new ArrayList<>(0);
         }
         this.directLog("Spawning " + rooms.size() + " rooms of type " + rooms.get(0).getType().name());
+        List<CompletableFuture<Void>> futures = new ArrayList<>(rooms.size());
         for (Room r : rooms) {
-            r.experimentalLoadStructure();
+            futures.add(r.loadStructureAsync());
+            try {
+                Thread.sleep(25);
+            } catch (Exception e) {
+                continue;
+            }
         }
+        return futures;
     }
 
     private void directLog(String str) {

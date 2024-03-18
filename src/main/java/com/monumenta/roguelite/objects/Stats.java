@@ -1,32 +1,32 @@
 package com.monumenta.roguelite.objects;
 
-import com.monumenta.roguelite.enums.Biome;
-import com.monumenta.roguelite.enums.RoomType;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.monumenta.roguelite.enums.Biome;
+import com.monumenta.roguelite.enums.RoomType;
+
 public class Stats {
 
-    private final long startTime;
+    private long startTime;
     private int targetDungeonCount;
     private int dungeonCount;
     private int successfulDungeonCount;
     private int unsuccessfulDungeonCount;
-    private final Map<String, Integer> dungeonCalculationFailures;
+    private Map<String, Integer> dungeonCalculationFailures;
     private int unusedChestsTotal;
     private int spawnedChestsTotal;
     private int spawnedChestsObjectiveTotal;
     private int spawnedChestsNormalTotal;
-    private final Map<Biome, Integer> spawnedChestsObjective;
-    private final Map<Biome, Integer> spawnedChestsNormal;
+    private Map<Biome, Integer> spawnedChestsObjective;
+    private Map<Biome, Integer> spawnedChestsNormal;
     private int roomTotal;
-    private final Map<RoomType, Integer> roomTypeDistrib;
-    private final Map<RoomType, Map<String, Integer>> roomDistrib;
-    private final Map<String, Integer> roomWeightMap;
+    private Map<RoomType, Integer> roomTypeDistrib;
+    private Map<RoomType, Map<String, Integer>> roomDistrib;
+    private Map<String, Integer> roomWeightMap;
 
     public Stats() {
         this.dungeonCalculationFailures = new HashMap<>();

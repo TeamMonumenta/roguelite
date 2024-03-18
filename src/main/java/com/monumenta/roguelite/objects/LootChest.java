@@ -2,6 +2,7 @@ package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
