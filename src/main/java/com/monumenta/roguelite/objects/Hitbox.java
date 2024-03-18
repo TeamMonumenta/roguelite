@@ -20,18 +20,14 @@ public class Hitbox {
 
     public boolean collidesWith(Hitbox other) {
         //test collision between the two hitboxes
-        boolean collision = true &&
-                (this.pos1.getBlockX() + 1 <= other.pos2.getBlockX() && this.pos2.getBlockX() - 1 >= other.pos1.getBlockX()) &&
+        boolean collision = (this.pos1.getBlockX() + 1 <= other.pos2.getBlockX() && this.pos2.getBlockX() - 1 >= other.pos1.getBlockX()) &&
                 (this.pos1.getBlockY() + 1 <= other.pos2.getBlockY() && this.pos2.getBlockY() - 1 >= other.pos1.getBlockY()) &&
                 (this.pos1.getBlockZ() + 1 <= other.pos2.getBlockZ() && this.pos2.getBlockZ() - 1 >= other.pos1.getBlockZ());
         if (!collision) {
             //test collision with this hitbox and the world limits
             collision = this.pos1.getBlockY() < 0 || this.pos2.getBlockY() > 255;
         }
-        if (!collision) {
-            //test collision with instance limits
-            collision = false;
-        }
+        //test collision with instance limits
         return collision;
     }
 

@@ -1,10 +1,9 @@
 package com.monumenta.roguelite;
 
-import java.util.ArrayList;
-
 import com.monumenta.roguelite.objects.Door;
-
 import org.bukkit.block.BlockFace;
+
+import java.util.ArrayList;
 
 public class Utils {
     public static BlockFace rotateClockwise(BlockFace in) {

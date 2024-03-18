@@ -1,27 +1,22 @@
 package com.monumenta.roguelite;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.RoomType;
 import com.monumenta.roguelite.objects.Door;
 import com.monumenta.roguelite.objects.LootChest;
 import com.monumenta.roguelite.objects.Objective;
 import com.monumenta.roguelite.objects.Room;
-
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class FileParser {
 
