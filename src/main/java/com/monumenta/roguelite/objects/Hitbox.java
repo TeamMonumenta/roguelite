@@ -4,8 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 public class Hitbox {
-    private Vector pos1;
-    private Vector pos2;
+    private final Vector pos1;
+    private final Vector pos2;
 
     public Hitbox(Location p1, Location p2) {
         this.pos1 = new Vector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ());

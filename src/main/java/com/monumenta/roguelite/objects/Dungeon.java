@@ -14,18 +14,15 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Dungeon {
 
-    private Plugin plugin;
-    private boolean doDirectLog;
+    private final Plugin plugin;
+    private final boolean doDirectLog;
 
-    private ArrayList<Room> masterRoomPool;
-    private Location masterLocation;
+    private final ArrayList<Room> masterRoomPool;
+    private final Location masterLocation;
 
     private Location centerLoc;
     public DungeonStatus status;
@@ -76,7 +73,7 @@ public class Dungeon {
         }
 
         // find players that are in range for live log
-        for (Player player : this.centerLoc.getWorld().getPlayers()) {
+        for (Player player : Objects.requireNonNull(this.centerLoc.getWorld()).getPlayers()) {
             if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
                 this.loggingPlayers.add(player);
             }
@@ -372,7 +369,6 @@ public class Dungeon {
 
             // Load main rooms
             this.spawnRoomListSync(roomMap.getOrDefault(RoomType.NORMAL, null));
-            ;
             // Wait for all regular rooms to load before loading other types
             this.directLog("Main rooms spawned!");
 

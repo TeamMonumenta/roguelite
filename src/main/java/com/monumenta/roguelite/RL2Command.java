@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class RL2Command implements CommandExecutor {
 
     private ArrayList<Room> rooms;
-    private Plugin plugin;
+    private final Plugin plugin;
 
     RL2Command(Plugin p) {
         this.plugin = p;

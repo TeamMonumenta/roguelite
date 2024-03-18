@@ -7,6 +7,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.util.Vector;
 
+import java.util.Objects;
+
 public class Objective extends RoomObject {
 
     // basic constructor with default values
@@ -27,7 +29,7 @@ public class Objective extends RoomObject {
     public synchronized void spawnObjective() {
         Location loc = this.getLocation().clone().add(0.5, 1, 0.5);
         this.getLocation().getBlock().setType(Material.AIR);
-        loc.getWorld().spawn(loc, EnderCrystal.class);
+        Objects.requireNonNull(loc.getWorld()).spawn(loc, EnderCrystal.class);
     }
 
     public void spawnChest() {
