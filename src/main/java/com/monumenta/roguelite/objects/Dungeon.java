@@ -1,26 +1,32 @@
 package com.monumenta.roguelite.objects;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.Utils;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.Config;
 import com.monumenta.roguelite.enums.DungeonStatus;
 import com.monumenta.roguelite.enums.RoomType;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Dungeon {
 
@@ -356,6 +362,7 @@ public class Dungeon {
     */
 
 
+    // This is called on an async thread
     public void spawn() {
         if (this.status != DungeonStatus.CALCULATED) {
             this.directLog(ChatColor.DARK_RED + "Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name());
@@ -388,6 +395,9 @@ public class Dungeon {
 
             // Wait for all rooms to finish spawning
             CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+
+            // Mark chunks as modified before proceeding
+            markChunksModified().get();
 
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 this.spawnObjectives();
@@ -453,6 +463,94 @@ public class Dungeon {
             }
         }
         return futures;
+    }
+
+    private CompletableFuture<Void> markChunksModified() {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+
+        NamespacedKey modifiedKey = NamespacedKey.fromString("force_modified", this.plugin);
+        if (modifiedKey == null) {
+            result.complete(null);
+            return result;
+        }
+
+        Location cl = this.centerLoc;
+        World world = cl.getWorld();
+        if (world == null) {
+            result.complete(null);
+            return result;
+        }
+        List<Long> unchecked = new ArrayList<>();
+        Set<Long> seen = new HashSet<>();
+        unchecked.add(getChunkKey(cl.getChunk()));
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            public boolean processOne() {
+                // If out of chunks to mark, we're done here
+                if (unchecked.isEmpty()) {
+                    return false;
+                }
+
+                Long testKey = unchecked.remove(0);
+                Chunk chunk = getChunkAt(world, testKey);
+                Block testBlock = chunk.getBlock(7, 252, 7);
+                // All chunks that contain the instance have bedrock here; ignore those that don't
+                if (!Material.BEDROCK.equals(testBlock.getType())) {
+                    return true;
+                }
+                seen.add(testKey);
+
+                // Add neighboring chunks to the list of unchecked chunks
+                for (long futureKey : getNeighboringChunks(testKey)) {
+                    if (!seen.contains(futureKey)) {
+                        unchecked.add(futureKey);
+                    }
+                }
+
+                // Modify the chunk in a way that can be detected later
+                chunk.getPersistentDataContainer().set(modifiedKey, PersistentDataType.BYTE, (byte)1);
+                return true;
+            }
+
+            @Override
+            public void run() {
+                for (int i = 0; i < 16; i++) {
+                    if (!processOne()) {
+                        result.complete(null);
+                        this.cancel();
+                        return;
+                    }
+                }
+            }
+        };
+        runnable.runTaskTimer(this.plugin, 0L, 1L);
+        return result;
+    }
+
+    private List<Long> getNeighboringChunks(long chunkKey) {
+        List<Long> result = new ArrayList<>();
+        // X
+        result.add(chunkKey - 1L);
+        result.add(chunkKey + 1L);
+        // Z
+        result.add(chunkKey - (1L << 32));
+        result.add(chunkKey + (1L << 32));
+        return result;
+    }
+
+    // From Paper 1.19.4
+    private Chunk getChunkAt(World world, long chunkKey) {
+        return world.getChunkAt((int) chunkKey, (int) (chunkKey >> 32));
+    }
+
+    // From Paper 1.19.4
+    private long getChunkKey(Chunk chunk) {
+        return getChunkKey(chunk.getX(), chunk.getZ());
+    }
+
+    // From Paper 1.19.4
+    private long getChunkKey(int x, int z) {
+        return (long)x & 4294967295L | ((long)z & 4294967295L) << 32;
     }
 
     private void directLog(String str) {
