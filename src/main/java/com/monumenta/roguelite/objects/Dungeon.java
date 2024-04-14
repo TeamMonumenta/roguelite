@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -480,7 +482,7 @@ public class Dungeon {
             result.complete(null);
             return result;
         }
-        List<Long> unchecked = new ArrayList<>();
+        SortedSet<Long> unchecked = new TreeSet<>();
         Set<Long> seen = new HashSet<>();
         unchecked.add(getChunkKey(cl.getChunk()));
 
@@ -491,7 +493,8 @@ public class Dungeon {
                     return false;
                 }
 
-                Long testKey = unchecked.remove(0);
+                Long testKey = unchecked.first();
+                unchecked.remove(testKey);
                 Chunk chunk = getChunkAt(world, testKey);
                 Block testBlock = chunk.getBlock(7, 252, 7);
                 // All chunks that contain the instance have bedrock here; ignore those that don't
@@ -514,7 +517,7 @@ public class Dungeon {
 
             @Override
             public void run() {
-                for (int i = 0; i < 16; i++) {
+                for (int i = 0; i < 64; i++) {
                     if (!processOne()) {
                         result.complete(null);
                         this.cancel();
