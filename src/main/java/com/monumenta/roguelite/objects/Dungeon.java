@@ -25,6 +25,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -470,12 +471,6 @@ public class Dungeon {
     private CompletableFuture<Void> markChunksModified() {
         CompletableFuture<Void> result = new CompletableFuture<>();
 
-        NamespacedKey modifiedKey = NamespacedKey.fromString("force_modified", this.plugin);
-        if (modifiedKey == null) {
-            result.complete(null);
-            return result;
-        }
-
         Location cl = this.centerLoc;
         World world = cl.getWorld();
         if (world == null) {
@@ -484,7 +479,7 @@ public class Dungeon {
         }
         SortedSet<Long> unchecked = new TreeSet<>();
         Set<Long> seen = new HashSet<>();
-        unchecked.add(getChunkKey(cl.getChunk()));
+        unchecked.add(cl.getChunk().getChunkKey());
 
         BukkitRunnable runnable = new BukkitRunnable() {
             public boolean processOne() {
@@ -495,7 +490,7 @@ public class Dungeon {
 
                 Long testKey = unchecked.first();
                 unchecked.remove(testKey);
-                Chunk chunk = getChunkAt(world, testKey);
+                Chunk chunk = world.getChunkAt(testKey);
                 Block testBlock = chunk.getBlock(7, 252, 7);
                 // All chunks that contain the instance have bedrock here; ignore those that don't
                 if (!Material.BEDROCK.equals(testBlock.getType())) {
@@ -511,7 +506,11 @@ public class Dungeon {
                 }
 
                 // Modify the chunk in a way that can be detected later
-                chunk.getPersistentDataContainer().set(modifiedKey, PersistentDataType.BYTE, (byte)1);
+                for (int cz = 0; cz < 16; cz++) {
+                    for (int cx = 0; cx < 16; cx++) {
+                        chunk.getBlock(cx, 254, cz).setType(Material.LIGHT);
+                    }
+                }
                 return true;
             }
 
@@ -539,21 +538,6 @@ public class Dungeon {
         result.add(chunkKey - (1L << 32));
         result.add(chunkKey + (1L << 32));
         return result;
-    }
-
-    // From Paper 1.19.4
-    private Chunk getChunkAt(World world, long chunkKey) {
-        return world.getChunkAt((int) chunkKey, (int) (chunkKey >> 32));
-    }
-
-    // From Paper 1.19.4
-    private long getChunkKey(Chunk chunk) {
-        return getChunkKey(chunk.getX(), chunk.getZ());
-    }
-
-    // From Paper 1.19.4
-    private long getChunkKey(int x, int z) {
-        return (long)x & 4294967295L | ((long)z & 4294967295L) << 32;
     }
 
     private void directLog(String str) {

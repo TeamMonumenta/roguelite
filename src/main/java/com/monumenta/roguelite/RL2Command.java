@@ -1,13 +1,11 @@
 package com.monumenta.roguelite;
 
-import java.util.ArrayList;
-
 import com.monumenta.roguelite.objects.Dungeon;
 import com.monumenta.roguelite.objects.DungeonReader;
 import com.monumenta.roguelite.objects.Room;
-
+import java.util.ArrayList;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -19,7 +17,7 @@ import org.bukkit.plugin.Plugin;
 public class RL2Command implements CommandExecutor {
 
     private ArrayList<Room> rooms;
-    private Plugin plugin;
+    private final Plugin plugin;
 
     RL2Command(Plugin p) {
         this.plugin = p;
@@ -28,11 +26,12 @@ public class RL2Command implements CommandExecutor {
 
     // displays help message for the command /rl2
     private void rl2Help(CommandSender sender) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "rl2 - Roguelite dungeon plugin\n" +
-                "avaiable sub-commands:\n" +
-                "/rl2 generate | Dungeon generation (WARNING: STARTS A DUNGEON GENERATION WITHOUT WARNING. IT IS NOT UNDOABLE)\n" +
-                "/rl2 reload | reloads internal data files\n" +
-                "/rl2 savestructure | save a in-game structure into internal data files"));
+        sender.sendMessage(Component.text("""
+				rl2 - Roguelite dungeon plugin
+				available sub-commands:
+				/rl2 generate | Dungeon generation (WARNING: STARTS A DUNGEON GENERATION WITHOUT WARNING. IT IS NOT UNDOABLE)
+				/rl2 reload | reloads internal data files
+				/rl2 savestructure | save a in-game structure into internal data files"""));
     }
 
     private static Location getSenderLocation(CommandSender sender) {
@@ -73,7 +72,7 @@ public class RL2Command implements CommandExecutor {
                 return true;
             case "reload":
                 this.rooms = FileParser.loadFiles(this.plugin, sender);
-                sender.sendMessage("" + this.rooms.size() + " Files reloaded");
+                sender.sendMessage(this.rooms.size() + " Files reloaded");
                 return true;
             case "stats":
 
@@ -81,18 +80,14 @@ public class RL2Command implements CommandExecutor {
                     sender.sendMessage("Failed. you need to specify the amounts on dungeons to be calculated");
                     return false;
                 }
-                boolean force = false;
-                if (args.length >= 3 && args[2].equals("confirm")) {
-                    force = true;
-                }
-                boolean finalForce = force;
-                Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+                boolean force = args.length >= 3 && args[2].equals("confirm");
+	            Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
                     DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
-                    reader.read(Integer.parseInt(args[1]), finalForce);
+                    reader.read(Integer.parseInt(args[1]), force);
                     reader.output();
                 });
                 return true;
-			default:
+            default:
                 sender.sendMessage("Unknown command: " + args[0]);
                 return false;
         }
