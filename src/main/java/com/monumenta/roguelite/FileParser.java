@@ -1,10 +1,5 @@
 package com.monumenta.roguelite;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,7 +11,10 @@ import com.monumenta.roguelite.objects.Door;
 import com.monumenta.roguelite.objects.LootChest;
 import com.monumenta.roguelite.objects.Objective;
 import com.monumenta.roguelite.objects.Room;
-
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;

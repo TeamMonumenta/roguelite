@@ -1,9 +1,7 @@
 package com.monumenta.roguelite;
 
-import java.util.ArrayList;
-
 import com.monumenta.roguelite.objects.Door;
-
+import java.util.ArrayList;
 import org.bukkit.block.BlockFace;
 
 public class Utils {
