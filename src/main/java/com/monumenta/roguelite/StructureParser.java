@@ -154,7 +154,7 @@ public class StructureParser {
                 this.room.setType(RoomType.UTIL);
                 break;
             case RED_CONCRETE:
-                this.room.setType(RoomType.DEAD_END);
+                this.room.setType(RoomType.DEADEND);
                 break;
             case LIME_CONCRETE:
                 this.room.setType(RoomType.END);

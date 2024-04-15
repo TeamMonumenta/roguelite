@@ -269,7 +269,7 @@ public class Dungeon {
     }
 
     private void generateDeadEnd(Door curDoor) {
-        ArrayList<Door> compatibleDoors = this.selectCompatibleDoors(RoomType.DEAD_END, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
+        ArrayList<Door> compatibleDoors = this.selectCompatibleDoors(RoomType.DEADEND, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
         Door d = compatibleDoors.get(0); //there should be only 1 compatible dead end
         // get this door's room
         Room r = d.getParentRoom();
@@ -391,7 +391,7 @@ public class Dungeon {
             // Load other types of rooms
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.UTIL, null)));
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.END, null)));
-            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEAD_END, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
 
             // Wait for all rooms to finish spawning
             CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).get();

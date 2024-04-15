@@ -4,7 +4,7 @@ public enum RoomType {
     NONE,
     NORMAL,
     UTIL,
-    DEAD_END,
+    DEADEND,
     END,
     CORRIDOR
 }
