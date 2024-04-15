@@ -3,6 +3,7 @@ package com.monumenta.roguelite.objects;
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
 
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -48,7 +49,7 @@ public class LootChest extends RoomObject {
     }
 
     public static void spawnLootChest(Location loc, String table, BlockFace facing, boolean waterlogged) {
-        // Set the block to a chest so it can be manipulated
+        // Set the block to a chest, so it can be manipulated
         loc.getBlock().setType(Material.CHEST);
 
         // Set the facing, waterlogged, and loot table state of the chest
@@ -57,7 +58,7 @@ public class LootChest extends RoomObject {
         chestData.setFacing(facing);
         chestData.setWaterlogged(waterlogged);
         blockState.setBlockData(chestData);
-        LootTable loot = Bukkit.getLootTable(NamespacedKey.fromString(table));
+        LootTable loot = Bukkit.getLootTable(Objects.requireNonNull(NamespacedKey.fromString(table)));
         if (loot == null) {
             Main.getInstance().getLogger().severe("Could not find loot table: " + table);
         }

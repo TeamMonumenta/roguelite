@@ -31,6 +31,7 @@ public class FileParser {
         JsonParser jsonParser = new JsonParser();
 
         File folder = new File(roomsPath);
+        //noinspection ResultOfMethodCallIgnored
         folder.mkdirs();
         for (File subfolder : folder.listFiles()) {
             if (subfolder.isDirectory()) {

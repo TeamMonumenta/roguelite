@@ -1,6 +1,6 @@
 package com.monumenta.roguelite.enums;
 
 public class Config {
-    public static final int ROOMSTOSPAWN = 40;
-    public static final int CHESTCOUNT = 80;
+    public static final int ROOMS_TO_SPAWN = 40;
+    public static final int CHEST_COUNT = 80;
 }

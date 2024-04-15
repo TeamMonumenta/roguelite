@@ -8,18 +8,13 @@ import org.bukkit.block.BlockFace;
 
 public class Utils {
     public static BlockFace rotateClockwise(BlockFace in) {
-        switch (in) {
-            case NORTH:
-                return BlockFace.EAST;
-            case EAST:
-                return BlockFace.SOUTH;
-            case SOUTH:
-                return BlockFace.WEST;
-            case WEST:
-                return BlockFace.NORTH;
-            default:
-                return BlockFace.SELF;
-        }
+	    return switch (in) {
+		    case NORTH -> BlockFace.EAST;
+		    case EAST -> BlockFace.SOUTH;
+		    case SOUTH -> BlockFace.WEST;
+		    case WEST -> BlockFace.NORTH;
+		    default -> BlockFace.SELF;
+	    };
     }
 
     public static Door getRandomDoorFromWeightedList(ArrayList<Door> list) {

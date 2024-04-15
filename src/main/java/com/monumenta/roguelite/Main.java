@@ -1,5 +1,6 @@
 package com.monumenta.roguelite;
 
+import java.util.Objects;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
@@ -8,7 +9,7 @@ public class Main extends JavaPlugin {
 
     public void onEnable() {
         PluginInstance = this;
-        this.getCommand("roguelite").setExecutor(new RL2Command(this));
+        Objects.requireNonNull(this.getCommand("roguelite")).setExecutor(new RL2Command(this));
     }
 
     public void onDisable() {

@@ -71,13 +71,13 @@ public class DungeonReader {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             dungeon.calculationException.printStackTrace(pw);
-            this.stats.addTodungeonCalculationFailures(sw.toString(), 1);
+            this.stats.addToDungeonCalculationFailures(sw.toString(), 1);
         }
     }
 
     private void readRooms(ArrayList<Room> rooms) {
         for (Room r : rooms) {
-            this.stats.addToRoomDistrib(r, 1);
+            this.stats.addToRoomDistribution(r, 1);
         }
     }
 
@@ -97,11 +97,12 @@ public class DungeonReader {
         String fileName = new SimpleDateFormat("yyyyMMdd-HH:mm:ss").format(new Date(System.currentTimeMillis()));
         String filePath = this.plugin.getDataFolder().getPath() + "/stats/" + fileName + ".txt";
         File f = new File(filePath);
+        //noinspection ResultOfMethodCallIgnored
         f.getParentFile().mkdirs();
         try (FileWriter file = new FileWriter(f)) {
             file.write(str);
             file.flush();
-            this.sender.sendMessage(filePath + " Writen.");
+            this.sender.sendMessage(filePath + " Written.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,20 +130,20 @@ public class DungeonReader {
         this.addDungeons(str);
         this.addUnusedChests(str);
         this.addChests(str);
-        this.addRoomDistrib(str);
+        this.addRoomDistribution(str);
         return str.toString();
     }
 
     private void addHeader(StringBuilder str) {
         str.append("Monumenta - Friendly Roguelite Experience Dungeon - Stats for ").append(this.stats.getTargetDungeonCount()).append(" dungeons\n");
-        Long msElapsed = System.currentTimeMillis() - this.stats.getStartTime();
+        long msElapsed = System.currentTimeMillis() - this.stats.getStartTime();
         str.append(String.format("generated over %.2f seconds, with an average of %d nanoseconds per dungeon.\n\n", (float)msElapsed / 1000, msElapsed*1000 / this.stats.getTargetDungeonCount()));
     }
 
     private void addDungeons(StringBuilder str) {
         str.append("Dungeons: ").append(this.stats.getDungeonCount()).append("\n");
         str.append(String.format("\t┣╾ Successful calculations: %d (%.1f%%)\n", this.stats.getSuccessfulDungeonCount(), 100 * ((float)this.stats.getSuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
-        str.append(String.format("\t┗╾ Unsucessful calculations: %d (%.1f%%)\n", this.stats.getUnsuccessfulDungeonCount(), 100 * ((float)this.stats.getUnsuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
+        str.append(String.format("\t┗╾ Unsuccessful calculations: %d (%.1f%%)\n", this.stats.getUnsuccessfulDungeonCount(), 100 * ((float)this.stats.getUnsuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
         if (this.stats.getUnsuccessfulDungeonCount() > 0) {
             Iterator<Map.Entry<String, Integer>> i = this.stats.getDungeonCalculationFailures().entrySet().iterator();
             while (i.hasNext()) {
@@ -195,11 +196,11 @@ public class DungeonReader {
         str.append("\n\n");
     }
 
-    private void addRoomDistrib(StringBuilder str) {
+    private void addRoomDistribution(StringBuilder str) {
         int total = this.stats.getRoomTotal();
         int dc = this.stats.getSuccessfulDungeonCount();
         str.append(String.format("Rooms: %d (%.1f/D)\n", total, (float)total / dc));
-        Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.stats.getRoomTypeDistrib().entrySet().iterator();
+        Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.stats.getRoomTypeDistribution().entrySet().iterator();
         String typeLineSymbol = "┣╾";
         String typeIntermediateSymbol = "┃";
         while (typeIterator.hasNext()) {
@@ -208,16 +209,16 @@ public class DungeonReader {
                 typeLineSymbol = "┗╾";
                 typeIntermediateSymbol = " ";
             }
-            Map<String, Integer> roomDistrib = this.stats.getRoomDistrib(typeEntry.getKey());
+            Map<String, Integer> roomDistribution = this.stats.getRoomDistribution(typeEntry.getKey());
             float goalValue = 0.0f;
             String goalPresenceStr = "";
             if (typeEntry.getKey() == RoomType.NORMAL) {
-                goalValue = (float)typeEntry.getValue() / dc / roomDistrib.size() * 100.0f;
+                goalValue = (float)typeEntry.getValue() / dc / roomDistribution.size() * 100.0f;
                 goalPresenceStr = String.format(" (Goal Presence: %.1f%%)", goalValue);
             }
             str.append(String.format("\t%s %s: %d (%.1f/D)%s\n", typeLineSymbol, typeEntry.getKey().name(), typeEntry.getValue(), (float)typeEntry.getValue() / dc, goalPresenceStr));
-            Iterator<Map.Entry<String, Integer>> idIterator = roomDistrib.entrySet().iterator();
-            int iteratorLength = roomDistrib.entrySet().size();
+            Iterator<Map.Entry<String, Integer>> idIterator = roomDistribution.entrySet().iterator();
+            int iteratorLength = roomDistribution.entrySet().size();
             String idLineSymbol = "┣╾";
             while (idIterator.hasNext()) {
                 Map.Entry<String, Integer> idEntry = idIterator.next();
@@ -229,12 +230,13 @@ public class DungeonReader {
                 double roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
                 if (typeEntry.getKey() == RoomType.NORMAL) {
                     double maxDiffFromGoal = (Math.cbrt(iteratorLength));
+                    double roomWeightPercent = roomWeight * (1 - (presence - goalValue) / 100);
                     if (presence < goalValue - maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int)(roomWeight * (1 - (presence - goalValue) / 100))));
+                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int) roomWeightPercent));
                     } else if (presence > goalValue + maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too High %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int)(roomWeight * (1 - (presence - goalValue) / 100))));
+                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int) roomWeightPercent));
                     }
                 }
                 str.append(String.format("\t%s \t%s %s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",

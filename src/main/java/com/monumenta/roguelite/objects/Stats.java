@@ -11,29 +11,29 @@ import com.monumenta.roguelite.enums.RoomType;
 
 public class Stats {
 
-    private long startTime;
+    private final long startTime;
     private int targetDungeonCount;
     private int dungeonCount;
     private int successfulDungeonCount;
     private int unsuccessfulDungeonCount;
-    private Map<String, Integer> dungeonCalculationFailures;
+    private final Map<String, Integer> dungeonCalculationFailures;
     private int unusedChestsTotal;
     private int spawnedChestsTotal;
     private int spawnedChestsObjectiveTotal;
     private int spawnedChestsNormalTotal;
-    private Map<Biome, Integer> spawnedChestsObjective;
-    private Map<Biome, Integer> spawnedChestsNormal;
+    private final Map<Biome, Integer> spawnedChestsObjective;
+    private final Map<Biome, Integer> spawnedChestsNormal;
     private int roomTotal;
-    private Map<RoomType, Integer> roomTypeDistrib;
-    private Map<RoomType, Map<String, Integer>> roomDistrib;
-    private Map<String, Integer> roomWeightMap;
+    private final Map<RoomType, Integer> roomTypeDistribution;
+    private final Map<RoomType, Map<String, Integer>> roomDistribution;
+    private final Map<String, Integer> roomWeightMap;
 
     public Stats() {
         this.dungeonCalculationFailures = new HashMap<>();
         this.spawnedChestsObjective = new HashMap<>();
         this.spawnedChestsNormal = new HashMap<>();
-        this.roomDistrib = new HashMap<>();
-        this.roomTypeDistrib = new HashMap<>();
+        this.roomDistribution = new HashMap<>();
+        this.roomTypeDistribution = new HashMap<>();
         this.roomWeightMap = new HashMap<>();
         this.startTime = System.currentTimeMillis();
     }
@@ -56,7 +56,7 @@ public class Stats {
         this.unsuccessfulDungeonCount += amount;
     }
 
-    public void addTodungeonCalculationFailures(String failure, int amount) {
+    public void addToDungeonCalculationFailures(String failure, int amount) {
         this.dungeonCalculationFailures.put(failure, amount +
                 this.dungeonCalculationFailures.getOrDefault(failure, 0));
     }
@@ -95,14 +95,14 @@ public class Stats {
         this.roomTotal += amount;
     }
 
-    public void addToRoomTypeDistrib(RoomType type, int amount) {
+    public void addToRoomTypeDistribution(RoomType type, int amount) {
         this.addToRoomTotal(amount);
-        this.roomTypeDistrib.put(type, this.roomTypeDistrib.getOrDefault(type, 0) + amount);
+        this.roomTypeDistribution.put(type, this.roomTypeDistribution.getOrDefault(type, 0) + amount);
     }
 
-    public void addToRoomDistrib(Room r, int amount) {
-        this.addToRoomTypeDistrib(r.getType(), amount);
-        Map<String, Integer> m = this.roomDistrib.computeIfAbsent(r.getType(), l -> new HashMap<>());
+    public void addToRoomDistribution(Room r, int amount) {
+        this.addToRoomTypeDistribution(r.getType(), amount);
+        Map<String, Integer> m = this.roomDistribution.computeIfAbsent(r.getType(), l -> new HashMap<>());
         String id = r.getPath().substring(r.getPath().lastIndexOf("/"));
         this.addToRoomWeightMap(id, r.getWeight());
         m.put(id, m.getOrDefault(id, 0) + amount);
@@ -173,15 +173,15 @@ public class Stats {
         return roomTotal;
     }
 
-    public Map<RoomType, Integer> getRoomTypeDistrib() {
-        return this.roomTypeDistrib.entrySet().stream()
+    public Map<RoomType, Integer> getRoomTypeDistribution() {
+        return this.roomTypeDistribution.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
-    public Map<String, Integer> getRoomDistrib(RoomType type) {
-        return this.roomDistrib.get(type).entrySet().stream()
+    public Map<String, Integer> getRoomDistribution(RoomType type) {
+        return this.roomDistribution.get(type).entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));

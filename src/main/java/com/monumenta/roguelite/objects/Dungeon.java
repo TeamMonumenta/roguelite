@@ -30,11 +30,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Dungeon {
 
-    private Plugin plugin;
-    private boolean doDirectLog;
+    private final Plugin plugin;
+    private final boolean doDirectLog;
 
-    private ArrayList<Room> masterRoomPool;
-    private Location masterLocation;
+    private final ArrayList<Room> masterRoomPool;
+    private final Location masterLocation;
 
     private Location centerLoc;
     public DungeonStatus status;
@@ -148,7 +148,7 @@ public class Dungeon {
     private void selectChests() {
         // among the list of possible chests spawn, select enough, at random, to get a total chest count equal as the
         // count specified in config class. others won't spawn.
-        int amountToSpawn = Config.CHESTCOUNT - this.objectivePotentialSpawnPoints.size();
+        int amountToSpawn = Config.CHEST_COUNT - this.objectivePotentialSpawnPoints.size();
         Random rand = new Random();
         for (int i = 0; i < amountToSpawn; i++) {
             this.selectedLootChests.add(this.lootChestPotentialSpawnPoints.remove(rand.nextInt(this.lootChestPotentialSpawnPoints.size())));
@@ -156,29 +156,29 @@ public class Dungeon {
     }
 
     private void mainGenerationLoop() {
-        boolean generatedDeadend = false;
+        boolean generatedDeadEnd = false;
 
         int roomsToSpawnEnd = 0;
         int roomsToSpawnUtil = 0;
 
-        while (this.unusedDoorPool.size() > 0) {
+        while (!this.unusedDoorPool.isEmpty()) {
             // select a random door from the list of opened doors.
             Door currentDoor = this.unusedDoorPool.remove(new Random().nextInt(this.unusedDoorPool.size()));
             currentDoor.getLocation().setWorld(centerLoc.getWorld());
 
             boolean result = false;
 
-            // if the door is further than the distance threshold or the amount of rooms is enough, generate a deadend
-            if (this.currentIteration > Config.ROOMSTOSPAWN) {
-                this.generateDeadend(currentDoor);
+            // if the door is further than the distance threshold or the amount of rooms is enough, generate a dead end
+            if (this.currentIteration > Config.ROOMS_TO_SPAWN) {
+                this.generateDeadEnd(currentDoor);
                 continue;
             }
 
             // sets room type priorities
-            if (this.currentIteration == 25 && !generatedDeadend) {
+            if (this.currentIteration == 25 && !generatedDeadEnd) {
                 roomsToSpawnEnd++;
             }
-            if (this.currentIteration % 5 == 0 && this.currentIteration < 25 && !generatedDeadend) {
+            if (this.currentIteration % 5 == 0 && this.currentIteration < 25 && !generatedDeadEnd) {
                 roomsToSpawnUtil++;
             }
 
@@ -203,10 +203,10 @@ public class Dungeon {
 
             if (!result) {
                 // if the room is not correctly spawned
-                this.generateDeadend(currentDoor);
-                generatedDeadend = true;
+                this.generateDeadEnd(currentDoor);
+                generatedDeadEnd = true;
             } else {
-                generatedDeadend = false;
+                generatedDeadEnd = false;
             }
         }
     }
@@ -228,16 +228,16 @@ public class Dungeon {
     }
 
     private boolean attemptGenerateRoom(Door curDoor, RoomType roomType) {
-        // go though every unused room, and list the doors that can connect with the current door.
-        ArrayList<Door> compatDoors = this.selectCompatibleDoors(roomType, curDoor.getDirection(), curDoor.getBiome());
+        // go through every unused room, and list the doors that can connect with the current door.
+        ArrayList<Door> compatibleDoors = this.selectCompatibleDoors(roomType, curDoor.getDirection(), curDoor.getBiome());
 
-        // go though all these doors, at random. until one of them yields a compatible room, or no doors is left to test
+        // go through all these doors, at random. until one of them yields a compatible room, or no doors is left to test
         boolean success = false;
         Room testedRoom;
         Door testedDoor = new Door();
-        while (!success && !compatDoors.isEmpty()) {
+        while (!compatibleDoors.isEmpty()) {
             // get a random door
-            testedDoor = Utils.getRandomDoorFromWeightedList(compatDoors);
+            testedDoor = Utils.getRandomDoorFromWeightedList(compatibleDoors);
             // get this door's room
             testedRoom = testedDoor.getParentRoom();
             // find this room coordinates, and calculate its (if supposedly spawned) hitbox
@@ -255,7 +255,7 @@ public class Dungeon {
                 success = true;
                 break;
             }
-            compatDoors.remove(testedDoor);
+            compatibleDoors.remove(testedDoor);
         }
         if (!success) {
             // no compatible room found. abort the method, and fallback.
@@ -268,15 +268,15 @@ public class Dungeon {
         return true;
     }
 
-    private void generateDeadend(Door curDoor) {
-        ArrayList<Door> compatDoors = this.selectCompatibleDoors(RoomType.DEADEND, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
-        Door d = compatDoors.get(0); //there should be only 1 compatible deadend
+    private void generateDeadEnd(Door curDoor) {
+        ArrayList<Door> compatibleDoors = this.selectCompatibleDoors(RoomType.DEAD_END, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
+        Door d = compatibleDoors.get(0); //there should be only 1 compatible dead end
         // get this door's room
         Room r = d.getParentRoom();
         // find this room coordinates, and calculate its hitbox
         r.setLocation(curDoor.getLocation().clone().subtract(d.getRelPos()));
         r.setHitbox(new Hitbox(r));
-        // place a copy of the room back into the unused pool, as deadends needs to be used multiple times
+        // place a copy of the room back into the unused pool, as dead ends needs to be used multiple times
         this.unusedRoomPool.add(new Room(r));
         this.placeRoom(r, d);
     }
@@ -342,7 +342,7 @@ public class Dungeon {
                 s.append(ChatColor.RED);
                 s.append("Calculation Failed. Please contact a moderator, as our instance cannot be generated.\n");
                 s.append("Latest error:\n");
-                s.append(e.toString());
+                s.append(e);
                 s.append("\n");
                 for (StackTraceElement elem : e.getStackTrace()) {
                     s.append(elem.toString());
@@ -369,7 +369,7 @@ public class Dungeon {
             return;
         }
         // sort rooms of different kinds in different lists. so that their order of spawn can be chosen
-        Map<RoomType, ArrayList<Room>> roomMap = new HashMap<RoomType, ArrayList<Room>>();
+        Map<RoomType, ArrayList<Room>> roomMap = new HashMap<>();
         for (Room r : this.usedRooms) {
             if (!roomMap.containsKey(r.getType())) {
                 roomMap.put(r.getType(), new ArrayList<>());
@@ -385,16 +385,16 @@ public class Dungeon {
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
 
             // Wait for all regular rooms to load before loading other types
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).get();
             futures.clear();
 
             // Load other types of rooms
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.UTIL, null)));
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.END, null)));
-            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
+            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEAD_END, null)));
 
             // Wait for all rooms to finish spawning
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).get();
 
             // Mark chunks as modified before proceeding
             markChunksModified().get();
@@ -458,8 +458,7 @@ public class Dungeon {
             futures.add(r.loadStructureAsync());
             try {
                 Thread.sleep(25);
-            } catch (Exception e) {
-                continue;
+            } catch (Exception ignored) {
             }
         }
         return futures;

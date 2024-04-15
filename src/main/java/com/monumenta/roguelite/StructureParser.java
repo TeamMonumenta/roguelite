@@ -28,15 +28,15 @@ import org.bukkit.util.Vector;
 
 public class StructureParser {
 
-    private Plugin plugin;
+    private final Plugin plugin;
 
     private CommandSender sender;
-    private String[] commandArgs;
+    private final String[] commandArgs;
     private String fullRoomName;
-    private Location lowLoc;
-    private Location highLoc;
+    private final Location lowLoc;
+    private final Location highLoc;
 
-    private Room room;
+    private final Room room;
 
     StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String[] args) {
         this.plugin = plug;
@@ -76,12 +76,13 @@ public class StructureParser {
                 this.room.setPath(path);
                 String filePath = this.plugin.getDataFolder().getPath() + "/rooms/" + this.fullRoomName + ".json";
                 File f = new File(filePath);
-                f.getParentFile().mkdirs();
+	            //noinspection ResultOfMethodCallIgnored
+	            f.getParentFile().mkdirs();
                 try (FileWriter file = new FileWriter(f)) {
                     String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
                     file.write(str);
                     file.flush();
-                    this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
+                    this.sender.sendMessage(filePath + " Written.\nContent:" + str);
                 } catch (IOException e) {
                     this.sender.sendMessage(ChatColor.RED + "Failed to save JSON: " + e.getMessage());
                     e.printStackTrace();
@@ -155,7 +156,7 @@ public class StructureParser {
                 this.room.setType(RoomType.UTIL);
                 break;
             case RED_CONCRETE:
-                this.room.setType(RoomType.DEADEND);
+                this.room.setType(RoomType.DEAD_END);
                 break;
             case LIME_CONCRETE:
                 this.room.setType(RoomType.END);
@@ -227,14 +228,14 @@ public class StructureParser {
     }
 
     private void parseDoor(Block block) {
-        // make sure it is a door, by checking if the block above is a doorframe block
+        // make sure it is a door, by checking if the block above is a door frame block
         if (block.getRelative(BlockFace.UP).getType() != Material.POLISHED_ANDESITE) {
             return;
         }
         // and by checking it is on the outer shell (get the direction at the same time)
         BlockFace direction = this.getObjectDirectionOnOuterShell(block);
         if (direction == BlockFace.SELF) {
-            //no direction found, the block is not on outer shell, hence its not a door
+            //no direction found, the block is not on outer shell, hence it's not a door
             return;
         }
 
@@ -247,7 +248,7 @@ public class StructureParser {
         // get the relative position
         Vector relPos = block.getLocation().clone().subtract(this.lowLoc).toVector();
 
-        // create a door and add it to the doorlist of the room
+        // create a door and add it to the door list of the room
         Door d = new Door();
         d.setDirection(direction);
         d.setBiome(biome);
@@ -302,25 +303,15 @@ public class StructureParser {
     }
 
     private Biome getBiomeFromGlassOrBanner(Block block) {
-        switch (block.getType()) {
-            case WHITE_STAINED_GLASS:
-            case WHITE_BANNER:
-                return Biome.ANY;
-            case BLUE_STAINED_GLASS:
-            case BLUE_BANNER:
-                return Biome.WATER;
-            case GREEN_STAINED_GLASS:
-            case GREEN_BANNER:
-                return Biome.LUSH;
-            case GRAY_STAINED_GLASS:
-            case GRAY_BANNER:
-                return Biome.CITY;
-            case YELLOW_STAINED_GLASS:
-                return Biome.VAULT;
-            default:
-                // Other blocks have no significance
-                break;
-        }
-        return Biome.NONE;
+	    return switch (block.getType()) {
+		    case WHITE_STAINED_GLASS, WHITE_BANNER -> Biome.ANY;
+		    case BLUE_STAINED_GLASS, BLUE_BANNER -> Biome.WATER;
+		    case GREEN_STAINED_GLASS, GREEN_BANNER -> Biome.LUSH;
+		    case GRAY_STAINED_GLASS, GRAY_BANNER -> Biome.CITY;
+		    case YELLOW_STAINED_GLASS -> Biome.VAULT;
+		    default ->
+			    // Other blocks have no significance
+				    Biome.NONE;
+	    };
     }
 }

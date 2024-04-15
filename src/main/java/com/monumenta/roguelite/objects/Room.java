@@ -31,6 +31,7 @@ public class Room {
         this.size = old.size;
         this.location = old.location.clone();
         this.weight = old.weight;
+        this.hitbox = null;
 
         for (LootChest c : old.lootChestList) {
             this.lootChestList.add(new LootChest(c));
@@ -52,6 +53,7 @@ public class Room {
         this.lootChestList = new ArrayList<>();
         this.doorList = new ArrayList<>();
         this.type = RoomType.NONE;
+        this.hitbox = null;
     }
 
     //getters
