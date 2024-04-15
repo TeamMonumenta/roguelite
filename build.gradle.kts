@@ -60,6 +60,13 @@ bukkit {
     authors = listOf("Monumenta")
     depend = listOf("MonumentaStructureManagement")
     softDepend = listOf()
+    commands {
+        register("roguelite") {
+            description = "for all roguelite things ;p"
+            permission = "monumenta.roguelite"
+            usage = "/roguelite <args...>"
+        }
+    }
 }
 
 publishing {
