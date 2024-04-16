@@ -403,6 +403,7 @@ public class Dungeon {
                 this.spawnObjectives();
                 this.spawnChests();
                 this.openFirstPath();
+                this.centerLoc.getWorld().save();
                 this.directLog("Done.");
             });
         } catch (Exception ex) {
@@ -521,7 +522,10 @@ public class Dungeon {
                 }
             }
         };
-        runnable.runTaskTimer(this.plugin, 0L, 1L);
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            cl.getWorld().save();
+            runnable.runTaskTimer(this.plugin, 0L, 1L);
+        });
         return result;
     }
 
