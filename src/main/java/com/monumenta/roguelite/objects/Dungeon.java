@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -24,6 +26,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Light;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -116,7 +120,7 @@ public class Dungeon {
     private Dungeon calculate() throws Exception {
         // only calculate if the dungeon is initialized
         if (this.status != DungeonStatus.INITIALIZED) {
-            this.directLog(ChatColor.DARK_RED + "Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name());
+            this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
             throw new Exception("Dungeon calculation aborted: Dungeon is not initialised.");
         }
         this.currentIteration = 1;
@@ -476,36 +480,71 @@ public class Dungeon {
         }
         SortedSet<Long> unchecked = new TreeSet<>();
         Set<Long> seen = new HashSet<>();
+        List<Long> multiplePassChunkOrder = new ArrayList<>();
         unchecked.add(cl.getChunk().getChunkKey());
 
         BukkitRunnable runnable = new BukkitRunnable() {
-            public boolean processOne() {
-                // If out of chunks to mark, we're done here
-                if (unchecked.isEmpty()) {
+            int mPass = 1;
+            int mChunkIndex = 0;
+
+            public boolean nextPass() {
+                mPass++;
+                if (mPass > 3) {
                     return false;
                 }
+                mChunkIndex = multiplePassChunkOrder.size();
+                world.save();
+                directLog(Component.text("Chunk update pass " + mPass, NamedTextColor.AQUA));
+                return true;
+            }
 
-                Long testKey = unchecked.first();
-                unchecked.remove(testKey);
-                Chunk chunk = world.getChunkAt(testKey);
-                Block testBlock = chunk.getBlock(7, 252, 7);
-                // All chunks that contain the instance have bedrock here; ignore those that don't
-                if (!Material.BEDROCK.equals(testBlock.getType())) {
-                    return true;
-                }
-                seen.add(testKey);
-
-                // Add neighboring chunks to the list of unchecked chunks
-                for (long futureKey : getNeighboringChunks(testKey)) {
-                    if (!seen.contains(futureKey)) {
-                        unchecked.add(futureKey);
+            public boolean processOne() {
+                // If out of chunks to mark, we're done here
+                Chunk chunk;
+                if (mPass == 1) {
+                    if (unchecked.isEmpty()) {
+                        return nextPass();
                     }
+
+                    Long testKey = unchecked.first();
+                    unchecked.remove(testKey);
+                    chunk = world.getChunkAt(testKey);
+                    Block testBlock = chunk.getBlock(7, 252, 7);
+                    // All chunks that contain the instance have bedrock here; ignore those that don't
+                    if (!Material.BEDROCK.equals(testBlock.getType())) {
+                        return true;
+                    }
+                    seen.add(testKey);
+                    multiplePassChunkOrder.add(testKey);
+
+                    // Add neighboring chunks to the list of unchecked chunks
+                    for (long futureKey : getNeighboringChunks(testKey)) {
+                        if (!seen.contains(futureKey)) {
+                            unchecked.add(futureKey);
+                        }
+                    }
+                } else {
+                    mChunkIndex--;
+                    if (mChunkIndex < 0) {
+                        return nextPass();
+                    }
+                    if (mChunkIndex >= multiplePassChunkOrder.size()) {
+                        return true;
+                    }
+                    long testKey = multiplePassChunkOrder.get(mChunkIndex);
+                    chunk = world.getChunkAt(testKey);
                 }
 
                 // Modify the chunk in a way that can be detected later
+                BlockData blockData = Material.LIGHT.createBlockData();
+                if (blockData instanceof Light light) {
+                    light.setLevel(5 * mPass);
+                }
+
                 for (int cz = 0; cz < 16; cz++) {
                     for (int cx = 0; cx < 16; cx++) {
-                        chunk.getBlock(cx, 254, cz).setType(Material.LIGHT);
+                        chunk.getBlock(cx, 254, cz)
+                                .setBlockData(blockData);
                     }
                 }
                 return true;
@@ -513,17 +552,20 @@ public class Dungeon {
 
             @Override
             public void run() {
-                for (int i = 0; i < 64; i++) {
+                //for (int i = 0; i < 4; i++) {
                     if (!processOne()) {
+                        directLog(Component.text("Finished chunk update passes!", NamedTextColor.AQUA));
                         result.complete(null);
                         this.cancel();
-                        return;
+                        //return;
                     }
-                }
+                //}
             }
         };
         Bukkit.getScheduler().runTask(this.plugin, () -> {
+            directLog(Component.text("Pre-chunk update world save!", NamedTextColor.AQUA));
             cl.getWorld().save();
+            directLog(Component.text("Chunk update pass 1", NamedTextColor.AQUA));
             runnable.runTaskTimer(this.plugin, 0L, 1L);
         });
         return result;
@@ -541,11 +583,15 @@ public class Dungeon {
     }
 
     private void directLog(String str) {
+        directLog(Component.text(str, NamedTextColor.AQUA));
+    }
+
+    private void directLog(Component component) {
         if (!doDirectLog) {
             return;
         }
         for (Player player : this.loggingPlayers) {
-            player.sendMessage(ChatColor.AQUA + str);
+            player.sendMessage(component);
         }
     }
 }
