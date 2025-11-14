@@ -7,7 +7,7 @@ dependencies {
 }
 
 plugins {
-	id("com.playmonumenta.gradle-config") version "3.2"
+	id("com.playmonumenta.gradle-config") version "3.5"
 }
 
 monumenta {
