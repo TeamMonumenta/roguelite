@@ -1,5 +1,6 @@
 rootProject.name = "roguelite"
 include(":roguelite")
+project(":roguelite").projectDir = file("roguelite")
 
 pluginManagement {
 	repositories {
