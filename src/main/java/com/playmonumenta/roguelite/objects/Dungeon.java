@@ -20,7 +20,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,10 +33,10 @@ public class Dungeon {
 
     private Location centerLoc;
     public DungeonStatus status;
-    public Exception calculationException;
+    public @Nullable Exception calculationException;
     private int currentIteration;
 
-	private Audience loggingAudience;
+	private final Audience loggingAudience;
 
     private List<Room> unusedRoomPool;
     private List<Door> unusedDoorPool;
@@ -52,17 +51,33 @@ public class Dungeon {
     public List<LootChest> lootChestPotentialSpawnPoints;
 
     public Dungeon(List<Room> roomPoolMaster, Location l, Plugin p, boolean directLog) {
+	    this.plugin = p;
+	    this.doDirectLog = directLog;
+
         this.masterRoomPool = roomPoolMaster;
         this.masterLocation = l;
+
 		this.centerLoc = l;
         this.status = DungeonStatus.NULL;
-        this.plugin = p;
-        this.doDirectLog = directLog;
+		this.calculationException = null;
+		this.currentIteration = 0;
 
+	    this.loggingAudience = l.getWorld();
+
+	    this.unusedRoomPool = new ArrayList<>();
+		this.unusedDoorPool = new ArrayList<>();
+
+		this.usedRooms = new ArrayList<>();
+
+		this.hitboxCollection = new ArrayList<>();
+
+		this.selectedObjectives = new ArrayList<>();
+		this.objectivePotentialSpawnPoints = new ArrayList<>();
+		this.selectedLootChests = new ArrayList<>();
+		this.lootChestPotentialSpawnPoints = new ArrayList<>();
     }
 
     private Dungeon init() {
-		this.loggingAudience = Audience.empty();
         this.unusedRoomPool = new ArrayList<>();
         this.usedRooms = new ArrayList<>();
 
@@ -80,15 +95,6 @@ public class Dungeon {
                 unusedRoomPool.add(new Room(r));
             }
         }
-
-        // find players that are in range for live log
-	    List<Player> loggingPlayers = new ArrayList<>();
-        for (Player player : this.centerLoc.getWorld().getPlayers()) {
-            if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
-                loggingPlayers.add(player);
-            }
-        }
-		this.loggingAudience = Audience.audience(loggingPlayers);
 
         // create the basic doors
         this.unusedDoorPool = new ArrayList<>();
@@ -127,8 +133,10 @@ public class Dungeon {
         this.selectChests();
 
         if (!this.isSpawnReady()) {
-            this.directLog("Calculation Failed at end: " + this.calculationException.getMessage());
-            throw this.calculationException;
+            if (this.calculationException != null) {
+	            this.directLog("Calculation Failed at end: " + this.calculationException.getMessage());
+	            throw this.calculationException;
+            }
         } else {
             this.status = DungeonStatus.CALCULATED;
         }
@@ -218,7 +226,7 @@ public class Dungeon {
         }
         if (endRoomCount != 1) {
             this.calculationException = new Exception("End room count is wrong ( is " + endRoomCount + ", should be 1)");
-            //return false;
+            return false;
         }
         this.directLog("Calculation done. Ready for Spawn");
         this.status = DungeonStatus.CALCULATED;

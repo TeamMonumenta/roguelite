@@ -73,7 +73,9 @@ public class DungeonReader {
             this.stats.addToUnsuccessfulDungeonCount(1);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            dungeon.calculationException.printStackTrace(pw);
+            if (dungeon.calculationException != null) {
+	            dungeon.calculationException.printStackTrace(pw);
+            }
             this.stats.addToDungeonCalculationFailures(sw.toString(), 1);
         }
     }
