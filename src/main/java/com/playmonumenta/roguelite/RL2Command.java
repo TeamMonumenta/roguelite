@@ -48,15 +48,16 @@ public class RL2Command {
 			});
 
 	    StringArgument roomIdArg = new StringArgument("Room ID");
-	    LocationArgument minCornerArg = new LocationArgument("Corner 1", LocationType.BLOCK_POSITION);
-	    LocationArgument maxCornerArg = new LocationArgument("Corner 2", LocationType.BLOCK_POSITION);
+	    LocationArgument corner1 = new LocationArgument("Corner 1", LocationType.BLOCK_POSITION);
+	    LocationArgument corner2 = new LocationArgument("Corner 2", LocationType.BLOCK_POSITION);
 		CommandAPICommand saveStructureCommand = new CommandAPICommand("savestructure")
+			.withArguments(roomIdArg, corner1, corner2)
 			.executes((sender, args) -> {
 				accessCheck(sender);
 				Location senderLoc = getSenderLocation(sender);
 				String roomId = Objects.requireNonNull(args.getByArgument(roomIdArg));
-				Location minLoc = Objects.requireNonNull(args.getByArgument(minCornerArg));
-				Location maxLoc = Objects.requireNonNull(args.getByArgument(maxCornerArg));
+				Location minLoc = Objects.requireNonNull(args.getByArgument(corner1));
+				Location maxLoc = Objects.requireNonNull(args.getByArgument(corner2));
 				new StructureParser(this.plugin, senderLoc, sender, roomId, minLoc, maxLoc).startParser();
 			});
 
