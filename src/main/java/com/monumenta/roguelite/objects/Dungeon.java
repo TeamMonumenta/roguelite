@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -33,7 +36,7 @@ public class Dungeon {
     public Exception calculationException;
     private int currentIteration;
 
-    private ArrayList<Player> loggingPlayers;
+	private Audience loggingAudience;
 
     private ArrayList<Room> unusedRoomPool;
     private ArrayList<Door> unusedDoorPool;
@@ -57,7 +60,7 @@ public class Dungeon {
     }
 
     private Dungeon init() {
-        this.loggingPlayers = new ArrayList<>();
+		this.loggingAudience = Audience.empty();
         this.unusedRoomPool = new ArrayList<>();
         this.usedRooms = new ArrayList<>();
 
@@ -77,11 +80,13 @@ public class Dungeon {
         }
 
         // find players that are in range for live log
+	    ArrayList<Player> loggingPlayers = new ArrayList<>();
         for (Player player : this.centerLoc.getWorld().getPlayers()) {
             if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
-                this.loggingPlayers.add(player);
+                loggingPlayers.add(player);
             }
         }
+		this.loggingAudience = Audience.audience(loggingPlayers);
 
         // create the basic doors
         this.unusedDoorPool = new ArrayList<>();
@@ -108,7 +113,7 @@ public class Dungeon {
     private Dungeon calculate() throws Exception {
         // only calculate if the dungeon is initialized
         if (this.status != DungeonStatus.INITIALIZED) {
-            this.directLog(ChatColor.DARK_RED + "Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name());
+            this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
             throw new Exception("Dungeon calculation aborted: Dungeon is not initialised.");
         }
         this.currentIteration = 1;
@@ -323,7 +328,7 @@ public class Dungeon {
         Dungeon out = this.init();
         try {
             out.directLog("Starting Calculation");
-            out = out.calculate();
+	        out.calculate();
         } catch (Exception e) {
             if (maxAttempts > 0) {
                 out.directLog("Calculation Failed... Retrying");
@@ -331,7 +336,6 @@ public class Dungeon {
             } else {
                 this.calculationException = e;
                 StringBuilder s = new StringBuilder();
-                s.append(ChatColor.RED);
                 s.append("Calculation Failed. Please contact a moderator, as our instance cannot be generated.\n");
                 s.append("Latest error:\n");
                 s.append(e);
@@ -341,7 +345,7 @@ public class Dungeon {
                     s.append("\n");
                 }
                 out.directLog(s.toString());
-                e.printStackTrace();
+                Main.getInstance().getLogger().log(Level.WARNING, e, s::toString);
             }
         }
         return out;
@@ -356,7 +360,7 @@ public class Dungeon {
 
     public void spawn() {
         if (this.status != DungeonStatus.CALCULATED) {
-            this.directLog(ChatColor.DARK_RED + "Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name());
+            this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
             return;
         }
         // sort rooms of different kinds in different lists. so that their order of spawn can be chosen
@@ -395,7 +399,7 @@ public class Dungeon {
             });
         } catch (Exception ex) {
             this.directLog("Failed to generate instance: " + ex.getMessage());
-            ex.printStackTrace();
+            Main.getInstance().getLogger().log(Level.WARNING, "Failed to generate instance", ex);
         }
         this.status = DungeonStatus.SPAWNED;
     }
@@ -453,12 +457,15 @@ public class Dungeon {
         return futures;
     }
 
-    private void directLog(String str) {
+    private void directLog(String text) {
+		directLog(Component.text(text));
+    }
+
+	private void directLog(Component component) {
         if (!doDirectLog) {
             return;
         }
-        for (Player player : this.loggingPlayers) {
-            player.sendMessage(ChatColor.AQUA + str);
-        }
+	    loggingAudience.sendMessage(Component.text("", NamedTextColor.AQUA)
+		    .append(component));
     }
 }

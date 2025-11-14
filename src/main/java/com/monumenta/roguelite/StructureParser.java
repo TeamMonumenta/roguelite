@@ -11,9 +11,13 @@ import com.playmonumenta.structures.StructuresAPI;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import org.bukkit.ChatColor;
+import java.util.function.BiFunction;
+import java.util.logging.Level;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,14 +33,14 @@ public class StructureParser {
     private final Plugin plugin;
 
     private CommandSender sender;
-    private final String[] commandArgs;
+	private final String roomId;
     private String fullRoomName;
     private final Location lowLoc;
     private final Location highLoc;
 
     private final Room room;
 
-    StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String[] args) {
+    StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String roomId, Location corner1, Location corner2) {
         this.plugin = plug;
         this.sender = sender;
         for (Player p : senderLoc.getWorld().getPlayers()) {
@@ -44,21 +48,15 @@ public class StructureParser {
                 this.sender = p;
             }
         }
-        this.commandArgs = args;
-        this.lowLoc = senderLoc.clone().getBlock().getLocation();
-        this.highLoc = this.lowLoc.clone();
+		this.roomId = roomId;
+        this.lowLoc = getActualCorner(corner1, corner2, false);
+        this.highLoc = getActualCorner(corner1, corner2, true);
         this.room = new Room();
     }
 
     void startParser() {
-        if (this.commandArgs.length < 8) {
-            this.sender.sendMessage(ChatColor.RED + "At least 7 arguments are required\n/roguelite savestructure <id> <x1> <y1> <z1> <x2> <y2> <z2>");
-            return;
-        }
-
-        this.parseAndSetBaseCoords();
         this.parser();
-        this.fullRoomName = this.room.getType().name() + "/" + this.commandArgs[1];
+        this.fullRoomName = this.room.getType().name() + "/" + this.roomId;
 
         // Save the room
         String path =  "roguelite/" + this.fullRoomName;
@@ -67,8 +65,8 @@ public class StructureParser {
             // Saving complete
             if (ex != null) {
                 // Completed with an error
-                this.sender.sendMessage(ChatColor.RED + "Failed to save: " + ex.getMessage());
-                ex.printStackTrace();
+                this.sender.sendMessage(Component.text("Failed to save: " + ex.getMessage(), NamedTextColor.RED));
+	            Main.getInstance().getLogger().log(Level.WARNING, ex, () -> "Failed to save " + this.roomId + ": ");
             } else {
                 // Completed successfully
                 this.room.setPath(path);
@@ -79,10 +77,10 @@ public class StructureParser {
                     String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
                     file.write(str);
                     file.flush();
-                    this.sender.sendMessage(filePath + " Writen.\nContent:" + str);
+                    this.sender.sendMessage(filePath + " Written.\nContent:" + str);
                 } catch (IOException e) {
-                    this.sender.sendMessage(ChatColor.RED + "Failed to save JSON: " + e.getMessage());
-                    e.printStackTrace();
+                    this.sender.sendMessage(Component.text("Failed to save JSON: " + e.getMessage(), NamedTextColor.RED));
+	                Main.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to save JSON " + this.roomId + ": ");
                 }
             }
         });
@@ -232,7 +230,7 @@ public class StructureParser {
         // and by checking it is on the outer shell (get the direction at the same time)
         BlockFace direction = this.getObjectDirectionOnOuterShell(block);
         if (direction == BlockFace.SELF) {
-            //no direction found, the block is not on outer shell, hence its not a door
+            //no direction found, the block is not on outer shell, hence it's not a door
             return;
         }
 
@@ -245,7 +243,7 @@ public class StructureParser {
         // get the relative position
         Vector relPos = block.getLocation().clone().subtract(this.lowLoc).toVector();
 
-        // create a door and add it to the doorlist of the room
+        // create a door and add it to the doorList of the room
         Door d = new Door();
         d.setDirection(direction);
         d.setBiome(biome);
@@ -254,36 +252,21 @@ public class StructureParser {
 
     }
 
-    private void parseAndSetBaseCoords() {
-        // read the commands argument
-        this.lowLoc.setX(Integer.parseInt(this.commandArgs[2]));
-        this.lowLoc.setY(Integer.parseInt(this.commandArgs[3]));
-        this.lowLoc.setZ(Integer.parseInt(this.commandArgs[4]));
-        this.highLoc.setX(Integer.parseInt(this.commandArgs[5]));
-        this.highLoc.setY(Integer.parseInt(this.commandArgs[6]));
-        this.highLoc.setZ(Integer.parseInt(this.commandArgs[7]));
-        // find the lowest coord for each axis, and invert them if they are in the wrong order
-        if (this.lowLoc.getBlockX() > this.highLoc.getBlockX()) {
-            int tmp = this.highLoc.getBlockX();
-            this.highLoc.setX(this.lowLoc.getBlockX());
-            this.lowLoc.setX(tmp);
-        }
-        if (this.lowLoc.getBlockY() > this.highLoc.getBlockY()) {
-            int tmp = this.highLoc.getBlockY();
-            this.highLoc.setY(this.lowLoc.getBlockY());
-            this.lowLoc.setY(tmp);
-        }
-        if (this.lowLoc.getBlockZ() > this.highLoc.getBlockZ()) {
-            int tmp = this.highLoc.getBlockZ();
-            this.highLoc.setZ(this.lowLoc.getBlockZ());
-            this.lowLoc.setZ(tmp);
-        }
-        // calculate room size
-        this.room.setSize(new Vector(
-                this.highLoc.getBlockX() - this.lowLoc.getBlockX(),
-                this.highLoc.getBlockY() - this.lowLoc.getBlockY(),
-                this.highLoc.getBlockZ() - this.lowLoc.getBlockZ()));
-    }
+	private Location getActualCorner(Location loc1, Location loc2, boolean wantMax) {
+		BiFunction<Integer, Integer, Integer> cornerFunction;
+		if (wantMax) {
+			cornerFunction = Integer::max;
+		} else {
+			cornerFunction = Integer::min;
+		}
+
+		World world = loc1.getWorld();
+		int x = cornerFunction.apply(loc1.getBlockX(), loc2.getBlockX());
+		int y = cornerFunction.apply(loc1.getBlockY(), loc2.getBlockY());
+		int z = cornerFunction.apply(loc1.getBlockZ(), loc2.getBlockZ());
+
+		return new Location(world, x, y, z);
+	}
 
     private BlockFace getObjectDirectionOnOuterShell(Block block) {
         if (block.getLocation().getBlockX() == lowLoc.getBlockX()) {

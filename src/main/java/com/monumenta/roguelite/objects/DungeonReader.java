@@ -1,5 +1,6 @@
 package com.monumenta.roguelite.objects;
 
+import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.DungeonStatus;
 import com.monumenta.roguelite.enums.RoomType;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -41,13 +44,13 @@ public class DungeonReader {
 
     public void read(int amount, boolean forced) {
         if (amount > 10000 && !forced) {
-            this.sender.sendMessage(String.format(
+            this.sender.sendMessage(Component.text(String.format(
                     "Warning: big number chosen. the command is expected to run for approximately %d seconds.\n" +
                             "enter 'confirm' as the third argument to use that amount.", (int)(amount * 0.0005)
-            ));
+            )));
             return;
         }
-        BukkitTask progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.sender.sendMessage(String.format("%.2f%%", this.progress)), 20L, 20L);
+        BukkitTask progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.sender.sendMessage(Component.text(String.format("%.2f%%", this.progress))), 20L, 20L);
         this.stats.addToTargetDungeonCount(amount);
         for (int i = 0; i < amount; i++) {
             this.progress = 100 * (float)i / amount;
@@ -99,9 +102,9 @@ public class DungeonReader {
         try (FileWriter file = new FileWriter(f)) {
             file.write(str);
             file.flush();
-            this.sender.sendMessage(filePath + " Writen.");
+            this.sender.sendMessage(Component.text(filePath + " Written."));
         } catch (IOException e) {
-            e.printStackTrace();
+	        Main.getInstance().getLogger().log(Level.WARNING, "Failed to save normal dungeon stats file", e);
         }
 
         // latest file
@@ -111,7 +114,7 @@ public class DungeonReader {
             file.write(str);
             file.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+	        Main.getInstance().getLogger().log(Level.WARNING, "Failed to save latest dungeon stats file", e);
         }
     }
 
@@ -127,7 +130,7 @@ public class DungeonReader {
         this.addDungeons(str);
         this.addUnusedChests(str);
         this.addChests(str);
-        this.addRoomDistrib(str);
+        this.addRoomDistribution(str);
         return str.toString();
     }
 
@@ -193,7 +196,7 @@ public class DungeonReader {
         str.append("\n\n");
     }
 
-    private void addRoomDistrib(StringBuilder str) {
+    private void addRoomDistribution(StringBuilder str) {
         int total = this.stats.getRoomTotal();
         int dc = this.stats.getSuccessfulDungeonCount();
         str.append(String.format("Rooms: %d (%.1f/D)\n", total, (float)total / dc));
@@ -206,16 +209,16 @@ public class DungeonReader {
                 typeLineSymbol = "┗╾";
                 typeIntermediateSymbol = " ";
             }
-            Map<String, Integer> roomDistrib = this.stats.getRoomDistrib(typeEntry.getKey());
+            Map<String, Integer> roomDistribution = this.stats.getRoomDistribution(typeEntry.getKey());
             float goalValue = 0.0f;
             String goalPresenceStr = "";
             if (typeEntry.getKey() == RoomType.NORMAL) {
-                goalValue = (float)typeEntry.getValue() / dc / roomDistrib.size() * 100.0f;
+                goalValue = (float)typeEntry.getValue() / dc / roomDistribution.size() * 100.0f;
                 goalPresenceStr = String.format(" (Goal Presence: %.1f%%)", goalValue);
             }
             str.append(String.format("\t%s %s: %d (%.1f/D)%s\n", typeLineSymbol, typeEntry.getKey().name(), typeEntry.getValue(), (float)typeEntry.getValue() / dc, goalPresenceStr));
-            Iterator<Map.Entry<String, Integer>> idIterator = roomDistrib.entrySet().iterator();
-            int iteratorLength = roomDistrib.size();
+            Iterator<Map.Entry<String, Integer>> idIterator = roomDistribution.entrySet().iterator();
+            int iteratorLength = roomDistribution.size();
             String idLineSymbol = "┣╾";
             while (idIterator.hasNext()) {
                 Map.Entry<String, Integer> idEntry = idIterator.next();
@@ -227,12 +230,13 @@ public class DungeonReader {
                 double roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
                 if (typeEntry.getKey() == RoomType.NORMAL) {
                     double maxDiffFromGoal = (Math.cbrt(iteratorLength));
-                    if (presence < goalValue - maxDiffFromGoal) {
+	                double calculatedValue = roomWeight * (1 - (presence - goalValue) / 100);
+	                if (presence < goalValue - maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int)(roomWeight * (1 - (presence - goalValue) / 100))));
+                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int) calculatedValue)));
                     } else if (presence > goalValue + maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too High %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int)(roomWeight * (1 - (presence - goalValue) / 100))));
+                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int) calculatedValue)));
                     }
                 }
                 str.append(String.format("\t%s \t%s %s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",

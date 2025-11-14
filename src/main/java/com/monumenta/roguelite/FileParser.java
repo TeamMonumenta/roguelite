@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
@@ -44,7 +45,7 @@ public class FileParser {
                             out.add(parseFile(jsonParser.parse(reader)));
                             outLog.append(" | ");
                         } catch (IOException e) {
-                            e.printStackTrace();
+	                        Main.getInstance().getLogger().log(Level.WARNING, "Failed to parse room file at " + fileName, e);
                         } catch (JsonParseException e) {
                             System.out.println("Json Parser crashed for file " + fileName);
                             throw e;

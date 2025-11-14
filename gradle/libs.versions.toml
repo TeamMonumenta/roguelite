@@ -1,0 +1,9 @@
+[versions]
+commandapi = "9.4.1"
+gson = "2.8.0"
+structures = "10.2"
+
+[libraries]
+commandapi = { module = "dev.jorel:commandapi-bukkit-core", version.ref = "commandapi" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+structures = { module = "com.playmonumenta:structures", version.ref = "structures" }

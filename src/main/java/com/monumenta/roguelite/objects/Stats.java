@@ -179,7 +179,7 @@ public class Stats {
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
-    public Map<String, Integer> getRoomDistrib(RoomType type) {
+    public Map<String, Integer> getRoomDistribution(RoomType type) {
         return this.roomDistrib.get(type).entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
