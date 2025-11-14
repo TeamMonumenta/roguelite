@@ -11,164 +11,164 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 public class Room {
-    private String path;
-    private RoomType type;
-    private Vector size;
-    private Location location;
-    private Hitbox hitbox;
-    private int weight;
+	private String path;
+	private RoomType type;
+	private Vector size;
+	private Location location;
+	private Hitbox hitbox;
+	private int weight;
 
-    List<Objective> objectiveList;
+	List<Objective> objectiveList;
 	List<LootChest> lootChestList;
 	List<Door> doorList;
 
-    // copy constructor
-    public Room(Room old) {
-        this();
-        this.path = old.path;
-        this.type = old.type;
-        this.size = old.size;
-        this.location = old.location.clone();
+	// copy constructor
+	public Room(Room old) {
+		this();
+		this.path = old.path;
+		this.type = old.type;
+		this.size = old.size;
+		this.location = old.location.clone();
 		this.hitbox = new Hitbox(old.hitbox);
-        this.weight = old.weight;
+		this.weight = old.weight;
 
-        for (LootChest c : old.lootChestList) {
-            this.lootChestList.add(new LootChest(c));
-        }
-        for (Objective o : old.objectiveList) {
-            this.objectiveList.add(new Objective(o));
-        }
-        for (Door d : old.doorList) {
-            Door n = new Door(d);
-            n.setParentRoom(this);
-            this.doorList.add(n);
-        }
-    }
+		for (LootChest c : old.lootChestList) {
+			this.lootChestList.add(new LootChest(c));
+		}
+		for (Objective o : old.objectiveList) {
+			this.objectiveList.add(new Objective(o));
+		}
+		for (Door d : old.doorList) {
+			Door n = new Door(d);
+			n.setParentRoom(this);
+			this.doorList.add(n);
+		}
+	}
 
-    //basic constructor
-    public Room() {
-        this.path = "undefined";
+	//basic constructor
+	public Room() {
+		this.path = "undefined";
 		this.type = RoomType.NONE;
 		this.size = new Vector(0, 0, 0);
 		this.location = new Location(null, 0, 0, 0);
 		this.hitbox = new Hitbox(this);
 		this.weight = 0;
-        this.objectiveList = new ArrayList<>();
-        this.lootChestList = new ArrayList<>();
-        this.doorList = new ArrayList<>();
-    }
+		this.objectiveList = new ArrayList<>();
+		this.lootChestList = new ArrayList<>();
+		this.doorList = new ArrayList<>();
+	}
 
-    //getters
+	//getters
 
-    public String getPath() {
-        return path;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public RoomType getType() {
-        return this.type;
-    }
+	public RoomType getType() {
+		return this.type;
+	}
 
-    public Vector getSize() {
-        return this.size;
-    }
+	public Vector getSize() {
+		return this.size;
+	}
 
-    public Location getLocation() {
-        return this.location;
-    }
+	public Location getLocation() {
+		return this.location;
+	}
 
-    public Hitbox getHitbox() {
-        return this.hitbox;
-    }
+	public Hitbox getHitbox() {
+		return this.hitbox;
+	}
 
-    public int getWeight() {
-        return this.weight;
-    }
+	public int getWeight() {
+		return this.weight;
+	}
 
-    public List<Door> getDoorList() {
-        return this.doorList;
-    }
+	public List<Door> getDoorList() {
+		return this.doorList;
+	}
 
-    public List<Objective> getObjectiveList() {
-        return this.objectiveList;
-    }
+	public List<Objective> getObjectiveList() {
+		return this.objectiveList;
+	}
 
-    public List<LootChest> getLootChestList() {
-        return this.lootChestList;
-    }
+	public List<LootChest> getLootChestList() {
+		return this.lootChestList;
+	}
 
-    public CompletableFuture<Void> loadStructureAsync() {
-        return StructuresAPI.loadAndPasteStructure(this.path, this.location, true, false);
-    }
+	public CompletableFuture<Void> loadStructureAsync() {
+		return StructuresAPI.loadAndPasteStructure(this.path, this.location, true, false);
+	}
 
-    // setters
+	// setters
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+	public void setPath(String path) {
+		this.path = path;
+	}
 
-    public void setType(RoomType type) {
-        this.type = type;
-    }
+	public void setType(RoomType type) {
+		this.type = type;
+	}
 
-    public void setSize(Vector size) {
-        this.size = size;
-    }
+	public void setSize(Vector size) {
+		this.size = size;
+	}
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+	public void setLocation(Location location) {
+		this.location = location;
+	}
 
-    public void setHitbox(Hitbox hitbox) {
-        this.hitbox = hitbox;
-    }
+	public void setHitbox(Hitbox hitbox) {
+		this.hitbox = hitbox;
+	}
 
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
 
-    public void setDoorList(List<Door> doorList) {
-        this.doorList = doorList;
-    }
+	public void setDoorList(List<Door> doorList) {
+		this.doorList = doorList;
+	}
 
-    public void setObjectiveList(List<Objective> objectiveList) {
-        this.objectiveList = objectiveList;
-    }
+	public void setObjectiveList(List<Objective> objectiveList) {
+		this.objectiveList = objectiveList;
+	}
 
-    public void setLootChestList(List<LootChest> lootChestList) {
-        this.lootChestList = lootChestList;
-    }
+	public void setLootChestList(List<LootChest> lootChestList) {
+		this.lootChestList = lootChestList;
+	}
 
-    // methods
+	// methods
 
-    public JsonObject toJsonObject() {
-        JsonObject room = new JsonObject();
-        JsonObject size = new JsonObject();
-        JsonArray doors = new JsonArray();
-        JsonArray objectives = new JsonArray();
-        JsonArray chests = new JsonArray();
+	public JsonObject toJsonObject() {
+		JsonObject room = new JsonObject();
+		JsonObject size = new JsonObject();
+		JsonArray doors = new JsonArray();
+		JsonArray objectives = new JsonArray();
+		JsonArray chests = new JsonArray();
 
-        Vector roomSize = this.getSize();
-        size.addProperty("x", roomSize.getBlockX());
-        size.addProperty("y", roomSize.getBlockY());
-        size.addProperty("z", roomSize.getBlockZ());
+		Vector roomSize = this.getSize();
+		size.addProperty("x", roomSize.getBlockX());
+		size.addProperty("y", roomSize.getBlockY());
+		size.addProperty("z", roomSize.getBlockZ());
 
-        for (Door d : doorList) {
-            doors.add(d.toJsonObject());
-        }
-        for (Objective o : objectiveList) {
-            objectives.add(o.toJsonObject());
-        }
-        for (LootChest c : lootChestList) {
-            chests.add(c.toJsonObject());
-        }
+		for (Door d : doorList) {
+			doors.add(d.toJsonObject());
+		}
+		for (Objective o : objectiveList) {
+			objectives.add(o.toJsonObject());
+		}
+		for (LootChest c : lootChestList) {
+			chests.add(c.toJsonObject());
+		}
 
-        room.addProperty("path", this.path);
-        room.add("size", size);
-        room.addProperty("type", this.type.name());
-        room.addProperty("weight", this.weight);
-        room.add("doors", doors);
-        room.add("objectives", objectives);
-        room.add("chests", chests);
-        return room;
-    }
+		room.addProperty("path", this.path);
+		room.add("size", size);
+		room.addProperty("type", this.type.name());
+		room.addProperty("weight", this.weight);
+		room.add("doors", doors);
+		room.add("objectives", objectives);
+		room.add("chests", chests);
+		return room;
+	}
 }

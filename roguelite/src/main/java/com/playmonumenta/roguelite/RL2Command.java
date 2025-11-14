@@ -24,12 +24,12 @@ import org.bukkit.plugin.Plugin;
 
 public class RL2Command {
 
-    private List<Room> rooms;
-    private final Plugin plugin;
+	private List<Room> rooms;
+	private final Plugin plugin;
 
-    RL2Command(Plugin p) {
-        this.plugin = p;
-        this.rooms = FileParser.loadRooms(p, null);
+	RL2Command(Plugin p) {
+		this.plugin = p;
+		this.rooms = FileParser.loadRooms(p, null);
 
 		CommandAPICommand helpCmd = new CommandAPICommand("help")
 			.executes((sender, args) -> {
@@ -47,9 +47,9 @@ public class RL2Command {
 				});
 			});
 
-	    StringArgument roomIdArg = new StringArgument("Room ID");
-	    LocationArgument corner1 = new LocationArgument("Corner 1", LocationType.BLOCK_POSITION);
-	    LocationArgument corner2 = new LocationArgument("Corner 2", LocationType.BLOCK_POSITION);
+		StringArgument roomIdArg = new StringArgument("Room ID");
+		LocationArgument corner1 = new LocationArgument("Corner 1", LocationType.BLOCK_POSITION);
+		LocationArgument corner2 = new LocationArgument("Corner 2", LocationType.BLOCK_POSITION);
 		CommandAPICommand saveStructureCommand = new CommandAPICommand("savestructure")
 			.withArguments(roomIdArg, corner1, corner2)
 			.executes((sender, args) -> {
@@ -61,40 +61,47 @@ public class RL2Command {
 				new StructureParser(this.plugin, senderLoc, sender, roomId, minLoc, maxLoc).startParser();
 			});
 
-	    CommandAPICommand reloadCommand = new CommandAPICommand("reload")
-		    .executes((sender, args) -> {
-			    accessCheck(sender);
-			    this.rooms = FileParser.loadRooms(this.plugin, sender);
-			    sender.sendMessage(this.rooms.size() + " Files reloaded");
-		    });
+		CommandAPICommand reloadCommand = new CommandAPICommand("reload")
+			.executes((sender, args) -> {
+				accessCheck(sender);
+				this.rooms = FileParser.loadRooms(this.plugin, sender);
+				sender.sendMessage(this.rooms.size() + " Files reloaded");
+			});
 
-	    IntegerArgument runCountArg = new IntegerArgument("Run Count");
-	    LiteralArgument forceArg = new LiteralArgument("confirm");
+		IntegerArgument runCountArg = new IntegerArgument("Run Count");
+		LiteralArgument forceArg = new LiteralArgument("confirm");
 		CommandAPICommand statsCommand = new CommandAPICommand("stats")
 			.withArguments(runCountArg)
 			.withOptionalArguments(forceArg)
-		    .executes((sender, args) -> {
-			    accessCheck(sender);
+			.executes((sender, args) -> {
+				accessCheck(sender);
 
 				int runCount = args.getByArgumentOrDefault(runCountArg, 1);
 				final boolean force = args.getByArgument(forceArg) != null;
 
-			    Location loc = getSenderLocation(sender);
-			    Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
-				    DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
-				    reader.read(runCount, force);
-				    reader.output();
-			    });
-		    });
+				if (runCount > 10000 && !force) {
+					throw CommandAPI.failWithString(String.format(
+						"Warning: big number chosen. the command is expected to run for approximately %d seconds.\n" +
+							"enter 'confirm' as the third argument to use that amount.", (int)(runCount * 0.0005)
+					));
+				}
 
-	    new CommandAPICommand("roguelite")
+				Location loc = getSenderLocation(sender);
+				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+					DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
+					reader.read(runCount);
+					reader.output();
+				});
+			});
+
+		new CommandAPICommand("roguelite")
 			.withSubcommand(helpCmd)
 			.withSubcommand(generateCmd)
 			.withSubcommand(saveStructureCommand)
-		    .withSubcommand(reloadCommand)
-		    .withSubcommand(statsCommand)
+			.withSubcommand(reloadCommand)
+			.withSubcommand(statsCommand)
 			.register();
-    }
+	}
 
 	private void accessCheck(CommandSender sender) throws WrapperCommandSyntaxException {
 		if (!(sender instanceof Player) && !(sender instanceof BlockCommandSender)) {
@@ -102,22 +109,22 @@ public class RL2Command {
 		}
 	}
 
-    // displays help message for the command /rl2
-    private void rl2Help(CommandSender sender) {
-        sender.sendMessage(Component.text("rl2 - Roguelite dungeon plugin", NamedTextColor.GREEN));
-	    sender.sendMessage(Component.text("available sub-commands:", NamedTextColor.GREEN));
-	    sender.sendMessage(Component.text("/rl2 generate | Dungeon generation (WARNING: STARTS A DUNGEON GENERATION WITHOUT WARNING. IT IS NOT UNDOABLE)", NamedTextColor.GREEN));
-	    sender.sendMessage(Component.text("/rl2 reload | reloads internal data files", NamedTextColor.GREEN));
-	    sender.sendMessage(Component.text("/rl2 savestructure | save a in-game structure into internal data files", NamedTextColor.GREEN));
-    }
+	// displays help message for the command /rl2
+	private void rl2Help(CommandSender sender) {
+		sender.sendMessage(Component.text("rl2 - Roguelite dungeon plugin", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("available sub-commands:", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("/rl2 generate | Dungeon generation (WARNING: STARTS A DUNGEON GENERATION WITHOUT WARNING. IT IS NOT UNDOABLE)", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("/rl2 reload | reloads internal data files", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("/rl2 savestructure | save a in-game structure into internal data files", NamedTextColor.GREEN));
+	}
 
-    private static Location getSenderLocation(CommandSender sender) throws WrapperCommandSyntaxException {
-        if (sender instanceof BlockCommandSender) {
-            return ((BlockCommandSender) sender).getBlock().getLocation();
-        }
-        if (sender instanceof Player) {
-            return ((Player) sender).getLocation();
-        }
-        throw CommandAPI.failWithString("You can only run this command as a command block or a player.");
-    }
+	private static Location getSenderLocation(CommandSender sender) throws WrapperCommandSyntaxException {
+		if (sender instanceof BlockCommandSender) {
+			return ((BlockCommandSender) sender).getBlock().getLocation();
+		}
+		if (sender instanceof Player) {
+			return ((Player) sender).getLocation();
+		}
+		throw CommandAPI.failWithString("You can only run this command as a command block or a player.");
+	}
 }
