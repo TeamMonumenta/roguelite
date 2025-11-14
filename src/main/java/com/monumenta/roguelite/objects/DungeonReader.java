@@ -1,5 +1,8 @@
 package com.monumenta.roguelite.objects;
 
+import com.monumenta.roguelite.enums.Biome;
+import com.monumenta.roguelite.enums.DungeonStatus;
+import com.monumenta.roguelite.enums.RoomType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,11 +13,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.monumenta.roguelite.enums.Biome;
-import com.monumenta.roguelite.enums.DungeonStatus;
-import com.monumenta.roguelite.enums.RoomType;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -217,7 +215,7 @@ public class DungeonReader {
             }
             str.append(String.format("\t%s %s: %d (%.1f/D)%s\n", typeLineSymbol, typeEntry.getKey().name(), typeEntry.getValue(), (float)typeEntry.getValue() / dc, goalPresenceStr));
             Iterator<Map.Entry<String, Integer>> idIterator = roomDistrib.entrySet().iterator();
-            int iteratorLength = roomDistrib.entrySet().size();
+            int iteratorLength = roomDistrib.size();
             String idLineSymbol = "┣╾";
             while (idIterator.hasNext()) {
                 Map.Entry<String, Integer> idEntry = idIterator.next();

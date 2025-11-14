@@ -1,19 +1,17 @@
 package com.monumenta.roguelite.objects;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.Utils;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.Config;
 import com.monumenta.roguelite.enums.DungeonStatus;
 import com.monumenta.roguelite.enums.RoomType;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,11 +22,11 @@ import org.bukkit.plugin.Plugin;
 
 public class Dungeon {
 
-    private Plugin plugin;
-    private boolean doDirectLog;
+    private final Plugin plugin;
+    private final boolean doDirectLog;
 
-    private ArrayList<Room> masterRoomPool;
-    private Location masterLocation;
+    private final ArrayList<Room> masterRoomPool;
+    private final Location masterLocation;
 
     private Location centerLoc;
     public DungeonStatus status;
@@ -336,7 +334,7 @@ public class Dungeon {
                 s.append(ChatColor.RED);
                 s.append("Calculation Failed. Please contact a moderator, as our instance cannot be generated.\n");
                 s.append("Latest error:\n");
-                s.append(e.toString());
+                s.append(e);
                 s.append("\n");
                 for (StackTraceElement elem : e.getStackTrace()) {
                     s.append(elem.toString());
