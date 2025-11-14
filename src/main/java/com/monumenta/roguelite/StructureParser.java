@@ -11,6 +11,7 @@ import com.playmonumenta.structures.StructuresAPI;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
@@ -73,7 +74,7 @@ public class StructureParser {
                 String filePath = this.plugin.getDataFolder().getPath() + "/rooms/" + this.fullRoomName + ".json";
                 File f = new File(filePath);
                 f.getParentFile().mkdirs();
-                try (FileWriter file = new FileWriter(f)) {
+                try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
                     String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
                     file.write(str);
                     file.flush();

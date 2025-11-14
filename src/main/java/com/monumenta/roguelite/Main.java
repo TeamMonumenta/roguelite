@@ -6,17 +6,14 @@ public class Main extends JavaPlugin {
 
     private static Main PluginInstance;
 
-    public void onEnable() {
+    @Override
+	public void onEnable() {
         PluginInstance = this;
 
 		new RL2Command(this);
     }
 
-    public void onDisable() {
-
-    }
-
-    public static Main getInstance() {
+	public static Main getInstance() {
         return PluginInstance;
     }
 

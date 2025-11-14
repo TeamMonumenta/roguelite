@@ -1,10 +1,10 @@
 package com.monumenta.roguelite;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.monumenta.roguelite.enums.Biome;
 import com.monumenta.roguelite.enums.RoomType;
 import com.monumenta.roguelite.objects.Door;
@@ -14,7 +14,9 @@ import com.monumenta.roguelite.objects.Room;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -24,10 +26,10 @@ import org.bukkit.util.Vector;
 
 public class FileParser {
 
-    static ArrayList<Room> loadRooms(Plugin plugin, CommandSender sender) {
-        ArrayList<Room> out = new ArrayList<>();
+    static List<Room> loadRooms(Plugin plugin, CommandSender sender) {
+        List<Room> out = new ArrayList<>();
         String roomsPath = plugin.getDataFolder().getPath() + "/rooms";
-        JsonParser jsonParser = new JsonParser();
+	    Gson gson = new Gson();
 
         File folder = new File(roomsPath);
         folder.mkdirs();
@@ -40,9 +42,9 @@ public class FileParser {
                 for (File file : subfolder.listFiles()) {
                     if (file.isFile()) {
                         String fileName = file.getPath();
-                        try (FileReader reader = new FileReader(fileName)) {
+                        try (FileReader reader = new FileReader(fileName, StandardCharsets.UTF_8)) {
                             outLog.append(file.getName());
-                            out.add(parseFile(jsonParser.parse(reader)));
+                            out.add(parseFile(gson.fromJson(reader, JsonObject.class)));
                             outLog.append(" | ");
                         } catch (IOException e) {
 	                        Main.getInstance().getLogger().log(Level.WARNING, "Failed to parse room file at " + fileName, e);
@@ -75,8 +77,8 @@ public class FileParser {
         return out;
     }
 
-    static ArrayList<Door> parseDoorList(Room parentRoom, JsonArray array) {
-        ArrayList<Door> out = new ArrayList<>();
+    static List<Door> parseDoorList(Room parentRoom, JsonArray array) {
+        List<Door> out = new ArrayList<>();
 
         for (JsonElement e : array) {
             JsonObject obj = e.getAsJsonObject();
@@ -90,8 +92,8 @@ public class FileParser {
         return out;
     }
 
-    static ArrayList<Objective> parseObjectiveList(JsonArray array) {
-        ArrayList<Objective> out = new ArrayList<>();
+    static List<Objective> parseObjectiveList(JsonArray array) {
+        List<Objective> out = new ArrayList<>();
 
         for (JsonElement e : array) {
             JsonObject obj = e.getAsJsonObject();
@@ -104,8 +106,8 @@ public class FileParser {
         return out;
     }
 
-    static ArrayList<LootChest> parseChestList(JsonArray array) {
-        ArrayList<LootChest> out = new ArrayList<>();
+    static List<LootChest> parseChestList(JsonArray array) {
+        List<LootChest> out = new ArrayList<>();
 
         for (JsonElement e : array) {
             JsonObject obj = e.getAsJsonObject();

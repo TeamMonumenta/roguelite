@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.monumenta.roguelite.enums.RoomType;
 import com.playmonumenta.structures.StructuresAPI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -17,9 +18,9 @@ public class Room {
     private Hitbox hitbox;
     private int weight;
 
-    ArrayList<Objective> objectiveList;
-    ArrayList<LootChest> lootChestList;
-    ArrayList<Door> doorList;
+    List<Objective> objectiveList;
+	List<LootChest> lootChestList;
+	List<Door> doorList;
 
     // copy constructor
     public Room(Room old) {
@@ -79,20 +80,20 @@ public class Room {
         return this.weight;
     }
 
-    public ArrayList<Door> getDoorList() {
+    public List<Door> getDoorList() {
         return this.doorList;
     }
 
-    public ArrayList<Objective> getObjectiveList() {
+    public List<Objective> getObjectiveList() {
         return this.objectiveList;
     }
 
-    public ArrayList<LootChest> getLootChestList() {
+    public List<LootChest> getLootChestList() {
         return this.lootChestList;
     }
 
     public CompletableFuture<Void> loadStructureAsync() {
-        return StructuresAPI.loadAndPasteStructure(this.path, this.location, true);
+        return StructuresAPI.loadAndPasteStructure(this.path, this.location, true, false);
     }
 
     // setters
@@ -121,15 +122,15 @@ public class Room {
         this.weight = weight;
     }
 
-    public void setDoorList(ArrayList<Door> doorList) {
+    public void setDoorList(List<Door> doorList) {
         this.doorList = doorList;
     }
 
-    public void setObjectiveList(ArrayList<Objective> objectiveList) {
+    public void setObjectiveList(List<Objective> objectiveList) {
         this.objectiveList = objectiveList;
     }
 
-    public void setLootChestList(ArrayList<LootChest> lootChestList) {
+    public void setLootChestList(List<LootChest> lootChestList) {
         this.lootChestList = lootChestList;
     }
 

@@ -28,7 +28,7 @@ public class Dungeon {
     private final Plugin plugin;
     private final boolean doDirectLog;
 
-    private final ArrayList<Room> masterRoomPool;
+    private final List<Room> masterRoomPool;
     private final Location masterLocation;
 
     private Location centerLoc;
@@ -38,19 +38,19 @@ public class Dungeon {
 
 	private Audience loggingAudience;
 
-    private ArrayList<Room> unusedRoomPool;
-    private ArrayList<Door> unusedDoorPool;
+    private List<Room> unusedRoomPool;
+    private List<Door> unusedDoorPool;
 
-    public ArrayList<Room> usedRooms;
+    public List<Room> usedRooms;
 
-    private ArrayList<Hitbox> hitboxCollection;
+    private List<Hitbox> hitboxCollection;
 
-    private ArrayList<Objective> selectedObjectives;
-    public ArrayList<Objective> objectivePotentialSpawnPoints;
-    public ArrayList<LootChest> selectedLootChests;
-    public ArrayList<LootChest> lootChestPotentialSpawnPoints;
+    private List<Objective> selectedObjectives;
+    public List<Objective> objectivePotentialSpawnPoints;
+    public List<LootChest> selectedLootChests;
+    public List<LootChest> lootChestPotentialSpawnPoints;
 
-    public Dungeon(ArrayList<Room> roomPoolMaster, Location l, Plugin p, boolean directLog) {
+    public Dungeon(List<Room> roomPoolMaster, Location l, Plugin p, boolean directLog) {
         this.masterRoomPool = roomPoolMaster;
         this.masterLocation = l;
         this.status = DungeonStatus.NULL;
@@ -80,7 +80,7 @@ public class Dungeon {
         }
 
         // find players that are in range for live log
-	    ArrayList<Player> loggingPlayers = new ArrayList<>();
+	    List<Player> loggingPlayers = new ArrayList<>();
         for (Player player : this.centerLoc.getWorld().getPlayers()) {
             if (player.getLocation().distanceSquared(this.centerLoc) <= 20000) {
                 loggingPlayers.add(player);
@@ -158,7 +158,7 @@ public class Dungeon {
         int roomsToSpawnEnd = 0;
         int roomsToSpawnUtil = 0;
 
-        while (this.unusedDoorPool.size() > 0) {
+        while (!this.unusedDoorPool.isEmpty()) {
             // select a random door from the list of opened doors.
             Door currentDoor = this.unusedDoorPool.remove(new Random().nextInt(this.unusedDoorPool.size()));
             currentDoor.getLocation().setWorld(centerLoc.getWorld());
@@ -226,15 +226,15 @@ public class Dungeon {
 
     private boolean attemptGenerateRoom(Door curDoor, RoomType roomType) {
         // go though every unused room, and list the doors that can connect with the current door.
-        ArrayList<Door> compatDoors = this.selectCompatibleDoors(roomType, curDoor.getDirection(), curDoor.getBiome());
+	    List<Door> compatibleDoors = this.selectCompatibleDoors(roomType, curDoor.getDirection(), curDoor.getBiome());
 
         // go though all these doors, at random. until one of them yields a compatible room, or no doors is left to test
         boolean success = false;
         Room testedRoom;
         Door testedDoor = new Door();
-        while (!success && !compatDoors.isEmpty()) {
+        while (!compatibleDoors.isEmpty()) {
             // get a random door
-            testedDoor = Utils.getRandomDoorFromWeightedList(compatDoors);
+            testedDoor = Utils.getRandomDoorFromWeightedList(compatibleDoors);
             // get this door's room
             testedRoom = testedDoor.getParentRoom();
             // find this room coordinates, and calculate its (if supposedly spawned) hitbox
@@ -252,7 +252,7 @@ public class Dungeon {
                 success = true;
                 break;
             }
-            compatDoors.remove(testedDoor);
+            compatibleDoors.remove(testedDoor);
         }
         if (!success) {
             // no compatible room found. abort the method, and fallback.
@@ -266,14 +266,14 @@ public class Dungeon {
     }
 
     private void generateDeadend(Door curDoor) {
-        ArrayList<Door> compatDoors = this.selectCompatibleDoors(RoomType.DEADEND, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
-        Door d = compatDoors.get(0); //there should be only 1 compatible deadend
+	    List<Door> compatibleDoors = this.selectCompatibleDoors(RoomType.DEADEND, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
+        Door d = compatibleDoors.get(0); //there should be only 1 compatible deadend
         // get this door's room
         Room r = d.getParentRoom();
         // find this room coordinates, and calculate its hitbox
         r.setLocation(curDoor.getLocation().clone().subtract(d.getRelPos()));
         r.setHitbox(new Hitbox(r));
-        // place a copy of the room back into the unused pool, as deadends needs to be used multiple times
+        // place a copy of the room back into the unused pool, as dead ends needs to be used multiple times
         this.unusedRoomPool.add(new Room(r));
         this.placeRoom(r, d);
     }
@@ -284,7 +284,7 @@ public class Dungeon {
         Location pos = testedRoom.getLocation().clone();
 
         //add new room's doors to the list of active doors
-        ArrayList<Door> newDoors = testedRoom.getDoorList();
+	    List<Door> newDoors = testedRoom.getDoorList();
         for (Door d : newDoors) {
             d.setLocation(pos.clone().add(d.getRelPos()));
             if (d == testedDoor) {
@@ -310,8 +310,8 @@ public class Dungeon {
         this.usedRooms.add(testedRoom);
     }
 
-    private ArrayList<Door> selectCompatibleDoors(RoomType type, BlockFace direction, Biome biome) {
-        ArrayList<Door> out = new ArrayList<>();
+    private List<Door> selectCompatibleDoors(RoomType type, BlockFace direction, Biome biome) {
+	    List<Door> out = new ArrayList<>();
         for (Room r : this.unusedRoomPool) {
             if (r.getType() == type) {
                 for (Door d: r.getDoorList()) {
@@ -364,7 +364,7 @@ public class Dungeon {
             return;
         }
         // sort rooms of different kinds in different lists. so that their order of spawn can be chosen
-        Map<RoomType, ArrayList<Room>> roomMap = new HashMap<RoomType, ArrayList<Room>>();
+        Map<RoomType, List<Room>> roomMap = new HashMap<>();
         for (Room r : this.usedRooms) {
             if (!roomMap.containsKey(r.getType())) {
                 roomMap.put(r.getType(), new ArrayList<>());
@@ -374,13 +374,12 @@ public class Dungeon {
 
         // spawn things
         try {
-            ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();
 
-            // Load main rooms
-            futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
+	        // Load main rooms
+	        List<CompletableFuture<Void>> futures = new ArrayList<>(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.NORMAL, null)));
 
             // Wait for all regular rooms to load before loading other types
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).get();
             futures.clear();
 
             // Load other types of rooms
@@ -389,7 +388,7 @@ public class Dungeon {
             futures.addAll(this.beginSpawningRoomList(roomMap.getOrDefault(RoomType.DEADEND, null)));
 
             // Wait for all rooms to finish spawning
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[futures.size()])).get();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).get();
 
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 this.spawnObjectives();
@@ -440,9 +439,9 @@ public class Dungeon {
         }
     }
 
-    private List<CompletableFuture<Void>> beginSpawningRoomList(ArrayList<Room> rooms) {
+    private List<CompletableFuture<Void>> beginSpawningRoomList(List<Room> rooms) {
         if (rooms == null) {
-            return new ArrayList<>(0);
+            return List.of();
         }
         this.directLog("Spawning " + rooms.size() + " rooms of type " + rooms.get(0).getType().name());
         List<CompletableFuture<Void>> futures = new ArrayList<>(rooms.size());
@@ -450,8 +449,8 @@ public class Dungeon {
             futures.add(r.loadStructureAsync());
             try {
                 Thread.sleep(25);
-            } catch (Exception e) {
-                continue;
+            } catch (Exception ignored) {
+                // Failing to sleep is a non-issue
             }
         }
         return futures;

@@ -9,10 +9,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
@@ -24,7 +26,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class DungeonReader {
 
-    private final ArrayList<Room> rooms;
+    private final List<Room> rooms;
     private final Plugin plugin;
     private final CommandSender sender;
     private float progress;
@@ -32,7 +34,7 @@ public class DungeonReader {
 
     private final Stats stats;
 
-    public DungeonReader(ArrayList<Room> r, Plugin p, CommandSender s, Location l) {
+    public DungeonReader(List<Room> r, Plugin p, CommandSender s, Location l) {
         this.plugin = p;
         this.rooms = r;
         this.sender = s;
@@ -76,7 +78,7 @@ public class DungeonReader {
         }
     }
 
-    private void readRooms(ArrayList<Room> rooms) {
+    private void readRooms(List<Room> rooms) {
         for (Room r : rooms) {
             this.stats.addToRoomDistrib(r, 1);
         }
@@ -95,11 +97,11 @@ public class DungeonReader {
         String str = this.getOutputString();
 
         // normal file
-        String fileName = new SimpleDateFormat("yyyyMMdd-HH:mm:ss").format(new Date(System.currentTimeMillis()));
+        String fileName = new SimpleDateFormat("yyyyMMdd-HH:mm:ss").format(LocalDateTime.now(ZoneOffset.UTC));
         String filePath = this.plugin.getDataFolder().getPath() + "/stats/" + fileName + ".txt";
         File f = new File(filePath);
         f.getParentFile().mkdirs();
-        try (FileWriter file = new FileWriter(f)) {
+        try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
             file.write(str);
             file.flush();
             this.sender.sendMessage(Component.text(filePath + " Written."));
@@ -110,7 +112,7 @@ public class DungeonReader {
         // latest file
         filePath = this.plugin.getDataFolder().getPath() + "/stats/latest.txt";
         f = new File(filePath);
-        try (FileWriter file = new FileWriter(f)) {
+        try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
             file.write(str);
             file.flush();
         } catch (IOException e) {
@@ -136,14 +138,14 @@ public class DungeonReader {
 
     private void addHeader(StringBuilder str) {
         str.append("Monumenta - Friendly Roguelite Experience Dungeon - Stats for ").append(this.stats.getTargetDungeonCount()).append(" dungeons\n");
-        Long msElapsed = System.currentTimeMillis() - this.stats.getStartTime();
+        long msElapsed = System.currentTimeMillis() - this.stats.getStartTime();
         str.append(String.format("generated over %.2f seconds, with an average of %d nanoseconds per dungeon.\n\n", (float)msElapsed / 1000, msElapsed*1000 / this.stats.getTargetDungeonCount()));
     }
 
     private void addDungeons(StringBuilder str) {
         str.append("Dungeons: ").append(this.stats.getDungeonCount()).append("\n");
         str.append(String.format("\t┣╾ Successful calculations: %d (%.1f%%)\n", this.stats.getSuccessfulDungeonCount(), 100 * ((float)this.stats.getSuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
-        str.append(String.format("\t┗╾ Unsucessful calculations: %d (%.1f%%)\n", this.stats.getUnsuccessfulDungeonCount(), 100 * ((float)this.stats.getUnsuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
+        str.append(String.format("\t┗╾ Unsuccessful calculations: %d (%.1f%%)\n", this.stats.getUnsuccessfulDungeonCount(), 100 * ((float)this.stats.getUnsuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
         if (this.stats.getUnsuccessfulDungeonCount() > 0) {
             Iterator<Map.Entry<String, Integer>> i = this.stats.getDungeonCalculationFailures().entrySet().iterator();
             while (i.hasNext()) {
@@ -229,7 +231,7 @@ public class DungeonReader {
                 String presenceError = "";
                 double roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
                 if (typeEntry.getKey() == RoomType.NORMAL) {
-                    double maxDiffFromGoal = (Math.cbrt(iteratorLength));
+                    double maxDiffFromGoal = Math.cbrt(iteratorLength);
 	                double calculatedValue = roomWeight * (1 - (presence - goalValue) / 100);
 	                if (presence < goalValue - maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);

@@ -12,6 +12,7 @@ import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +25,7 @@ import org.bukkit.plugin.Plugin;
 
 public class RL2Command {
 
-    private ArrayList<Room> rooms;
+    private List<Room> rooms;
     private final Plugin plugin;
 
     RL2Command(Plugin p) {

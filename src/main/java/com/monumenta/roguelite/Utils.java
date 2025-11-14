@@ -1,7 +1,7 @@
 package com.monumenta.roguelite;
 
 import com.monumenta.roguelite.objects.Door;
-import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.block.BlockFace;
 
 public class Utils {
@@ -20,7 +20,7 @@ public class Utils {
         }
     }
 
-    public static Door getRandomDoorFromWeightedList(ArrayList<Door> list) {
+    public static Door getRandomDoorFromWeightedList(List<Door> list) {
         // compute total weight
         double totalWeight = 0.0d;
         for (Door d : list) {

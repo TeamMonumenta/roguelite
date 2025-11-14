@@ -1,6 +1,7 @@
 package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.enums.Biome;
+import java.util.Locale;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -36,7 +37,7 @@ public class Objective extends RoomObject {
         if (this.getBiome() == Biome.VAULT) {
             table += "challenge";
         } else {
-            table += "objective_" + this.getBiome().name().toLowerCase();
+            table += "objective_" + this.getBiome().name().toLowerCase(Locale.ROOT);
         }
         boolean waterlogged = this.getBiome() == Biome.WATER;
 	    LootChest.spawnLootChest(loc, table, this.getDirection(), waterlogged);

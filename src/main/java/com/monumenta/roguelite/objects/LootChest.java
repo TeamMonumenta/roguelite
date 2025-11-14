@@ -2,6 +2,7 @@ package com.monumenta.roguelite.objects;
 
 import com.monumenta.roguelite.Main;
 import com.monumenta.roguelite.enums.Biome;
+import java.util.Locale;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,7 +32,7 @@ public class LootChest extends RoomObject {
 
     public void spawnChest() {
         Location loc = this.getLocation();
-        String table = "epic:r2/dungeons/fred/normal_" + this.getBiome().name().toLowerCase();
+        String table = "epic:r2/dungeons/fred/normal_" + this.getBiome().name().toLowerCase(Locale.ROOT);
         if (this.getBiome() == Biome.VAULT) {
             table = "epic:r2/dungeons/fred/challenge";
         }
