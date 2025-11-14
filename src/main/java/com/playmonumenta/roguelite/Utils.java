@@ -1,6 +1,6 @@
-package com.monumenta.roguelite;
+package com.playmonumenta.roguelite;
 
-import com.monumenta.roguelite.objects.Door;
+import com.playmonumenta.roguelite.objects.Door;
 import java.util.List;
 import org.bukkit.block.BlockFace;
 

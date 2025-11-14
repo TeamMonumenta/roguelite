@@ -1,6 +1,6 @@
-package com.monumenta.roguelite.objects;
+package com.playmonumenta.roguelite.objects;
 
-import com.monumenta.roguelite.enums.Biome;
+import com.playmonumenta.roguelite.enums.Biome;
 import java.util.Locale;
 import org.bukkit.Location;
 import org.bukkit.Material;

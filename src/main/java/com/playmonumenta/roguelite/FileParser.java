@@ -1,16 +1,16 @@
-package com.monumenta.roguelite;
+package com.playmonumenta.roguelite;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.monumenta.roguelite.enums.Biome;
-import com.monumenta.roguelite.enums.RoomType;
-import com.monumenta.roguelite.objects.Door;
-import com.monumenta.roguelite.objects.LootChest;
-import com.monumenta.roguelite.objects.Objective;
-import com.monumenta.roguelite.objects.Room;
+import com.playmonumenta.roguelite.enums.Biome;
+import com.playmonumenta.roguelite.enums.RoomType;
+import com.playmonumenta.roguelite.objects.Door;
+import com.playmonumenta.roguelite.objects.LootChest;
+import com.playmonumenta.roguelite.objects.Objective;
+import com.playmonumenta.roguelite.objects.Room;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.monumenta.roguelite.enums;
+package com.playmonumenta.roguelite.enums;
 
 public enum DungeonStatus {
     NULL,

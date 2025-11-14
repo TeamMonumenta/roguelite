@@ -1,4 +1,4 @@
-package com.monumenta.roguelite.objects;
+package com.playmonumenta.roguelite.objects;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;

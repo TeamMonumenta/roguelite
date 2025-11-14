@@ -1,11 +1,11 @@
-package com.monumenta.roguelite.objects;
+package com.playmonumenta.roguelite.objects;
 
-import com.monumenta.roguelite.Main;
-import com.monumenta.roguelite.Utils;
-import com.monumenta.roguelite.enums.Biome;
-import com.monumenta.roguelite.enums.Config;
-import com.monumenta.roguelite.enums.DungeonStatus;
-import com.monumenta.roguelite.enums.RoomType;
+import com.playmonumenta.roguelite.Main;
+import com.playmonumenta.roguelite.Utils;
+import com.playmonumenta.roguelite.enums.Biome;
+import com.playmonumenta.roguelite.enums.Config;
+import com.playmonumenta.roguelite.enums.DungeonStatus;
+import com.playmonumenta.roguelite.enums.RoomType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

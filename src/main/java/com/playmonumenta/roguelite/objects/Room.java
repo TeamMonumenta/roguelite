@@ -1,8 +1,8 @@
-package com.monumenta.roguelite.objects;
+package com.playmonumenta.roguelite.objects;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.monumenta.roguelite.enums.RoomType;
+import com.playmonumenta.roguelite.enums.RoomType;
 import com.playmonumenta.structures.StructuresAPI;
 import java.util.ArrayList;
 import java.util.List;
