@@ -22,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class Dungeon {
 
@@ -53,6 +54,7 @@ public class Dungeon {
     public Dungeon(List<Room> roomPoolMaster, Location l, Plugin p, boolean directLog) {
         this.masterRoomPool = roomPoolMaster;
         this.masterLocation = l;
+		this.centerLoc = l;
         this.status = DungeonStatus.NULL;
         this.plugin = p;
         this.doDirectLog = directLog;
@@ -110,7 +112,7 @@ public class Dungeon {
     *
     */
 
-    private Dungeon calculate() throws Exception {
+    private void calculate() throws Exception {
         // only calculate if the dungeon is initialized
         if (this.status != DungeonStatus.INITIALIZED) {
             this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
@@ -130,7 +132,6 @@ public class Dungeon {
         } else {
             this.status = DungeonStatus.CALCULATED;
         }
-        return this;
     }
 
     private void selectObjectives() {
@@ -439,7 +440,7 @@ public class Dungeon {
         }
     }
 
-    private List<CompletableFuture<Void>> beginSpawningRoomList(List<Room> rooms) {
+    private List<CompletableFuture<Void>> beginSpawningRoomList(@Nullable List<Room> rooms) {
         if (rooms == null) {
             return List.of();
         }

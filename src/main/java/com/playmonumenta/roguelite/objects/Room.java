@@ -47,11 +47,15 @@ public class Room {
 
     //basic constructor
     public Room() {
-        this.location = new Location(null, 0, 0, 0);
+        this.path = "undefined";
+		this.type = RoomType.NONE;
+		this.size = new Vector(0, 0, 0);
+		this.location = new Location(null, 0, 0, 0);
+		this.hitbox = new Hitbox(this);
+		this.weight = 0;
         this.objectiveList = new ArrayList<>();
         this.lootChestList = new ArrayList<>();
         this.doorList = new ArrayList<>();
-        this.type = RoomType.NONE;
     }
 
     //getters

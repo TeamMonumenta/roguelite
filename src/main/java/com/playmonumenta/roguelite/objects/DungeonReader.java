@@ -74,13 +74,13 @@ public class DungeonReader {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             dungeon.calculationException.printStackTrace(pw);
-            this.stats.addTodungeonCalculationFailures(sw.toString(), 1);
+            this.stats.addToDungeonCalculationFailures(sw.toString(), 1);
         }
     }
 
     private void readRooms(List<Room> rooms) {
         for (Room r : rooms) {
-            this.stats.addToRoomDistrib(r, 1);
+            this.stats.addToRoomDistribution(r, 1);
         }
     }
 
@@ -202,7 +202,7 @@ public class DungeonReader {
         int total = this.stats.getRoomTotal();
         int dc = this.stats.getSuccessfulDungeonCount();
         str.append(String.format("Rooms: %d (%.1f/D)\n", total, (float)total / dc));
-        Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.stats.getRoomTypeDistrib().entrySet().iterator();
+        Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.stats.getRoomTypeDistribution().entrySet().iterator();
         String typeLineSymbol = "┣╾";
         String typeIntermediateSymbol = "┃";
         while (typeIterator.hasNext()) {
@@ -229,22 +229,25 @@ public class DungeonReader {
                 }
                 float presence = 100 * (float)idEntry.getValue() / dc;
                 String presenceError = "";
-                double roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
+                Integer roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
+				if (roomWeight == null) {
+					continue;
+				}
                 if (typeEntry.getKey() == RoomType.NORMAL) {
                     double maxDiffFromGoal = Math.cbrt(iteratorLength);
 	                double calculatedValue = roomWeight * (1 - (presence - goalValue) / 100);
 	                if (presence < goalValue - maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, 1 + (int) calculatedValue)));
+                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, 1 + (int) calculatedValue)));
                     } else if (presence > goalValue + maxDiffFromGoal) {
                         presenceError = String.format(" !!! Too High %+.1f !!!", presence - goalValue);
-                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), (int)roomWeight, (int) calculatedValue)));
+                        this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, (int) calculatedValue)));
                     }
                 }
                 str.append(String.format("\t%s \t%s %s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",
                         typeIntermediateSymbol, idLineSymbol, idEntry.getKey(), idEntry.getValue(),
                         100 * (float)idEntry.getValue() / total, 100 * (float)idEntry.getValue() / typeEntry.getValue(), typeEntry.getKey().name(),
-                        presence, presenceError, (int)roomWeight));
+                        presence, presenceError, roomWeight));
             }
         }
         str.append("\n\n");

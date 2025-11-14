@@ -23,10 +23,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 public class FileParser {
 
-    static List<Room> loadRooms(Plugin plugin, CommandSender sender) {
+    static List<Room> loadRooms(Plugin plugin, @Nullable CommandSender sender) {
         List<Room> out = new ArrayList<>();
         String roomsPath = plugin.getDataFolder().getPath() + "/rooms";
 	    Gson gson = new Gson();

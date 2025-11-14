@@ -19,6 +19,7 @@ public class Door extends RoomObject {
         this.setLocation(loc);
         this.setBiome(biome);
         this.setDirection(dir);
+		this.parentRoom = new Room();
     }
 
     // copy constructor

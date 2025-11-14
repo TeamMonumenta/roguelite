@@ -1,20 +1,25 @@
 package com.playmonumenta.roguelite;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
 public class Main extends JavaPlugin {
 
-    private static Main PluginInstance;
+    private static @Nullable Main pluginInstance;
 
     @Override
 	public void onEnable() {
-        PluginInstance = this;
+        pluginInstance = this;
 
 		new RL2Command(this);
     }
 
 	public static Main getInstance() {
-        return PluginInstance;
+        Main instance = pluginInstance;
+		if (instance == null) {
+			throw new RuntimeException("You cannot get the instance before the plugin starts!");
+		}
+		return instance;
     }
 
 }

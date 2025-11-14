@@ -35,7 +35,7 @@ public class StructureParser {
 
     private CommandSender sender;
 	private final String roomId;
-    private String fullRoomName;
+    private String fullRoomName = "Not Set";
     private final Location lowLoc;
     private final Location highLoc;
 
