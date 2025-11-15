@@ -56,6 +56,7 @@ public class StructureParser {
 	}
 
 	void startParser() {
+		this.parseAndSetBaseCoords();
 		this.parser();
 		this.mFullRoomName = this.mRoom.getType().name() + "/" + this.mRoomId;
 
@@ -251,6 +252,14 @@ public class StructureParser {
 		d.setRelPos(relPos);
 		this.mRoom.getDoorList().add(d);
 
+	}
+
+	private void parseAndSetBaseCoords() {
+		// calculate room size
+		this.mRoom.setSize(new Vector(
+			this.mHighLoc.getBlockX() - this.mLowLoc.getBlockX(),
+			this.mHighLoc.getBlockY() - this.mLowLoc.getBlockY(),
+			this.mHighLoc.getBlockZ() - this.mLowLoc.getBlockZ()));
 	}
 
 	private Location getActualCorner(Location loc1, Location loc2, boolean wantMax) {
