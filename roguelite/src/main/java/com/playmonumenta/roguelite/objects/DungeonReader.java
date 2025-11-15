@@ -21,6 +21,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -56,7 +57,12 @@ public class DungeonReader {
 	}
 
 	public void read(int amount) {
-		BukkitTask progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.mPlugin, () -> this.mSender.sendMessage(Component.text(String.format("%.2f%%", this.mProgress))), 20L, 20L);
+		BukkitTask progressMeterTask;
+		if (this.mSender instanceof Player) {
+			progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.mPlugin, () -> this.mSender.sendActionBar(Component.text(String.format("%.2f%%", this.mProgress))), 1L, 1L);
+		} else {
+			progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.mPlugin, () -> this.mSender.sendMessage(Component.text(String.format("%.2f%%", this.mProgress))), 20L, 20L);
+		}
 		this.mStats.addToTargetDungeonCount(amount);
 		for (int i = 0; i < amount; i++) {
 			this.mProgress = 100 * (float)i / amount;
@@ -65,6 +71,11 @@ public class DungeonReader {
 			this.readDungeon(dungeon);
 		}
 		progressMeterTask.cancel();
+		if (this.mSender instanceof Player) {
+			this.mSender.sendActionBar(Component.text(String.format("%.2f%%", 100.0)));
+		} else {
+			this.mSender.sendMessage(Component.text(String.format("%.2f%%", 100.0)));
+		}
 	}
 
 	private void readDungeon(Dungeon dungeon) {
