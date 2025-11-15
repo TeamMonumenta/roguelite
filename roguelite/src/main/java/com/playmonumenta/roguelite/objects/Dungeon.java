@@ -25,90 +25,90 @@ import org.jetbrains.annotations.Nullable;
 
 public class Dungeon {
 
-	private final Plugin plugin;
-	private final boolean doDirectLog;
+	private final Plugin mPlugin;
+	private final boolean mDoDirectLog;
 
-	private final List<Room> masterRoomPool;
-	private final Location masterLocation;
+	private final List<Room> mMasterRoomPool;
+	private final Location mMasterLocation;
 
-	private Location centerLoc;
-	public DungeonStatus status;
-	public @Nullable Exception calculationException;
-	private int currentIteration;
+	private Location mCenterLoc;
+	public DungeonStatus mStatus;
+	public @Nullable Exception mCalculationException;
+	private int mCurrentIteration;
 
-	private final Audience loggingAudience;
+	private final Audience mLoggingAudience;
 
-	private List<Room> unusedRoomPool;
-	private List<Door> unusedDoorPool;
+	private List<Room> mUnusedRoomPool;
+	private List<Door> mUnusedDoorPool;
 
-	public List<Room> usedRooms;
+	public List<Room> mUsedRooms;
 
-	private List<Hitbox> hitboxCollection;
+	private List<Hitbox> mHitboxCollection;
 
-	private List<Objective> selectedObjectives;
-	public List<Objective> objectivePotentialSpawnPoints;
-	public List<LootChest> selectedLootChests;
-	public List<LootChest> lootChestPotentialSpawnPoints;
+	private List<Objective> mSelectedObjectives;
+	public List<Objective> mObjectivePotentialSpawnPoints;
+	public List<LootChest> mSelectedLootChests;
+	public List<LootChest> mLootChestPotentialSpawnPoints;
 
 	public Dungeon(List<Room> roomPoolMaster, Location l, Plugin p, boolean directLog) {
-		this.plugin = p;
-		this.doDirectLog = directLog;
+		this.mPlugin = p;
+		this.mDoDirectLog = directLog;
 
-		this.masterRoomPool = roomPoolMaster;
-		this.masterLocation = l;
+		this.mMasterRoomPool = roomPoolMaster;
+		this.mMasterLocation = l;
 
-		this.centerLoc = l;
-		this.status = DungeonStatus.NULL;
-		this.calculationException = null;
-		this.currentIteration = 0;
+		this.mCenterLoc = l;
+		this.mStatus = DungeonStatus.NULL;
+		this.mCalculationException = null;
+		this.mCurrentIteration = 0;
 
-		this.loggingAudience = l.getWorld();
+		this.mLoggingAudience = l.getWorld();
 
-		this.unusedRoomPool = new ArrayList<>();
-		this.unusedDoorPool = new ArrayList<>();
+		this.mUnusedRoomPool = new ArrayList<>();
+		this.mUnusedDoorPool = new ArrayList<>();
 
-		this.usedRooms = new ArrayList<>();
+		this.mUsedRooms = new ArrayList<>();
 
-		this.hitboxCollection = new ArrayList<>();
+		this.mHitboxCollection = new ArrayList<>();
 
-		this.selectedObjectives = new ArrayList<>();
-		this.objectivePotentialSpawnPoints = new ArrayList<>();
-		this.selectedLootChests = new ArrayList<>();
-		this.lootChestPotentialSpawnPoints = new ArrayList<>();
+		this.mSelectedObjectives = new ArrayList<>();
+		this.mObjectivePotentialSpawnPoints = new ArrayList<>();
+		this.mSelectedLootChests = new ArrayList<>();
+		this.mLootChestPotentialSpawnPoints = new ArrayList<>();
 	}
 
 	private Dungeon init() {
-		this.unusedRoomPool = new ArrayList<>();
-		this.usedRooms = new ArrayList<>();
+		this.mUnusedRoomPool = new ArrayList<>();
+		this.mUsedRooms = new ArrayList<>();
 
-		this.selectedObjectives = new ArrayList<>();
-		this.selectedLootChests = new ArrayList<>();
-		this.lootChestPotentialSpawnPoints = new ArrayList<>();
-		this.objectivePotentialSpawnPoints = new ArrayList<>();
+		this.mSelectedObjectives = new ArrayList<>();
+		this.mSelectedLootChests = new ArrayList<>();
+		this.mLootChestPotentialSpawnPoints = new ArrayList<>();
+		this.mObjectivePotentialSpawnPoints = new ArrayList<>();
 
-		this.centerLoc = this.masterLocation;
-		Location cl = this.centerLoc;
+		this.mCenterLoc = this.mMasterLocation;
+		Location cl = this.mCenterLoc;
 
 		// get a copy of the room pool
-		for (Room r : this.masterRoomPool) {
+		for (Room r : this.mMasterRoomPool) {
 			if (r.getWeight() != 0) {
-				unusedRoomPool.add(new Room(r));
+				mUnusedRoomPool.add(new Room(r));
 			}
 		}
 
 		// create the basic doors
-		this.unusedDoorPool = new ArrayList<>();
-		this.unusedDoorPool.add(new Door(this.centerLoc.clone().add(0,4,3), Biome.getRandom(), BlockFace.SOUTH));
+		this.mUnusedDoorPool = new ArrayList<>();
+		this.mUnusedDoorPool.add(new Door(this.mCenterLoc.clone().add(0,4,3), Biome.getRandom(), BlockFace.SOUTH));
 
 		// create hitboxes
-		this.hitboxCollection = new ArrayList<>();
-		this.hitboxCollection.add(new Hitbox(cl.clone().add(-18, -88, -28), cl.clone().add(15, 166, 3))); //Central box
-		this.hitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, -136), cl.clone().add(128, 166, -132))); //north instance limit
-		this.hitboxCollection.add(new Hitbox(cl.clone().add(128, -89, -132), cl.clone().add(132, 166, 123))); //east instance limit
-		this.hitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, 123), cl.clone().add(128, 166, 127))); //south instance limit
-		this.hitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -132), cl.clone().add(-127, 166, 123))); //west instance limit
+		this.mHitboxCollection = new ArrayList<>();
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-18, -88, -28), cl.clone().add(15, 166, 3))); //Central box
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, -136), cl.clone().add(128, 166, -132))); //north instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(128, -89, -132), cl.clone().add(132, 166, 123))); //east instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, 123), cl.clone().add(128, 166, 127))); //south instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -132), cl.clone().add(-127, 166, 123))); //west instance limit
 
-		this.status = DungeonStatus.INITIALIZED;
+		this.mStatus = DungeonStatus.INITIALIZED;
 		return this;
 	}
 
@@ -120,11 +120,11 @@ public class Dungeon {
 
 	private void calculate() throws Exception {
 		// only calculate if the dungeon is initialized
-		if (this.status != DungeonStatus.INITIALIZED) {
-			this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
+		if (this.mStatus != DungeonStatus.INITIALIZED) {
+			this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.mStatus.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			throw new Exception("Dungeon calculation aborted: Dungeon is not initialised.");
 		}
-		this.currentIteration = 1;
+		this.mCurrentIteration = 1;
 
 		// main generation loop
 		this.mainGenerationLoop();
@@ -133,12 +133,12 @@ public class Dungeon {
 		this.selectChests();
 
 		if (!this.isSpawnReady()) {
-			if (this.calculationException != null) {
-				this.directLog("Calculation Failed at end: " + this.calculationException.getMessage());
-				throw this.calculationException;
+			if (this.mCalculationException != null) {
+				this.directLog("Calculation Failed at end: " + this.mCalculationException.getMessage());
+				throw this.mCalculationException;
 			}
 		} else {
-			this.status = DungeonStatus.CALCULATED;
+			this.mStatus = DungeonStatus.CALCULATED;
 		}
 	}
 
@@ -146,18 +146,18 @@ public class Dungeon {
 		// among the list of possible objective spawns, select 3 to be actual objective ender crystals
 		// others will become chests
 		Random rand = new Random();
-		this.selectedObjectives.add(this.objectivePotentialSpawnPoints.remove(rand.nextInt(this.objectivePotentialSpawnPoints.size())));
-		this.selectedObjectives.add(this.objectivePotentialSpawnPoints.remove(rand.nextInt(this.objectivePotentialSpawnPoints.size())));
-		this.selectedObjectives.add(this.objectivePotentialSpawnPoints.remove(rand.nextInt(this.objectivePotentialSpawnPoints.size())));
+		this.mSelectedObjectives.add(this.mObjectivePotentialSpawnPoints.remove(rand.nextInt(this.mObjectivePotentialSpawnPoints.size())));
+		this.mSelectedObjectives.add(this.mObjectivePotentialSpawnPoints.remove(rand.nextInt(this.mObjectivePotentialSpawnPoints.size())));
+		this.mSelectedObjectives.add(this.mObjectivePotentialSpawnPoints.remove(rand.nextInt(this.mObjectivePotentialSpawnPoints.size())));
 	}
 
 	private void selectChests() {
 		// among the list of possible chests spawn, select enough, at random, to get a total chest count equal as the
 		// count specified in config class. others won't spawn.
-		int amountToSpawn = Config.CHESTCOUNT - this.objectivePotentialSpawnPoints.size();
+		int amountToSpawn = Config.CHEST_COUNT - this.mObjectivePotentialSpawnPoints.size();
 		Random rand = new Random();
 		for (int i = 0; i < amountToSpawn; i++) {
-			this.selectedLootChests.add(this.lootChestPotentialSpawnPoints.remove(rand.nextInt(this.lootChestPotentialSpawnPoints.size())));
+			this.mSelectedLootChests.add(this.mLootChestPotentialSpawnPoints.remove(rand.nextInt(this.mLootChestPotentialSpawnPoints.size())));
 		}
 	}
 
@@ -167,24 +167,24 @@ public class Dungeon {
 		int roomsToSpawnEnd = 0;
 		int roomsToSpawnUtil = 0;
 
-		while (!this.unusedDoorPool.isEmpty()) {
+		while (!this.mUnusedDoorPool.isEmpty()) {
 			// select a random door from the list of opened doors.
-			Door currentDoor = this.unusedDoorPool.remove(new Random().nextInt(this.unusedDoorPool.size()));
-			currentDoor.getLocation().setWorld(centerLoc.getWorld());
+			Door currentDoor = this.mUnusedDoorPool.remove(new Random().nextInt(this.mUnusedDoorPool.size()));
+			currentDoor.getLocation().setWorld(mCenterLoc.getWorld());
 
 			boolean result = false;
 
 			// if the door is further than the distance threshold or the amount of rooms is enough, generate a deadend
-			if (this.currentIteration > Config.ROOMSTOSPAWN) {
+			if (this.mCurrentIteration > Config.ROOMS_TO_SPAWN) {
 				this.generateDeadend(currentDoor);
 				continue;
 			}
 
 			// sets room type priorities
-			if (this.currentIteration == 25 && !generatedDeadend) {
+			if (this.mCurrentIteration == 25 && !generatedDeadend) {
 				roomsToSpawnEnd++;
 			}
-			if (this.currentIteration % 5 == 0 && this.currentIteration < 25 && !generatedDeadend) {
+			if (this.mCurrentIteration % 5 == 0 && this.mCurrentIteration < 25 && !generatedDeadend) {
 				roomsToSpawnUtil++;
 			}
 
@@ -219,17 +219,17 @@ public class Dungeon {
 
 	private boolean isSpawnReady() {
 		int endRoomCount = 0;
-		for (Room r : this.usedRooms) {
+		for (Room r : this.mUsedRooms) {
 			if (r.getType() == RoomType.END) {
 				endRoomCount++;
 			}
 		}
 		if (endRoomCount != 1) {
-			this.calculationException = new Exception("End room count is wrong ( is " + endRoomCount + ", should be 1)");
+			this.mCalculationException = new Exception("End room count is wrong ( is " + endRoomCount + ", should be 1)");
 			return false;
 		}
 		this.directLog("Calculation done. Ready for Spawn");
-		this.status = DungeonStatus.CALCULATED;
+		this.mStatus = DungeonStatus.CALCULATED;
 		return true;
 	}
 
@@ -251,7 +251,7 @@ public class Dungeon {
 			testedRoom.setHitbox(new Hitbox(testedRoom));
 			// test if that new room hitbox collides with the already spawned ones
 			boolean isColliding = false;
-			for (Hitbox h : this.hitboxCollection) {
+			for (Hitbox h : this.mHitboxCollection) {
 				if (testedRoom.getHitbox().collidesWith(h)) {
 					isColliding = true;
 					break;
@@ -268,7 +268,7 @@ public class Dungeon {
 			return false;
 		}
 
-		this.currentIteration++;
+		this.mCurrentIteration++;
 
 		this.placeRoom(testedDoor.getParentRoom(), testedDoor);
 		return true;
@@ -283,13 +283,13 @@ public class Dungeon {
 		r.setLocation(curDoor.getLocation().clone().subtract(d.getRelPos()));
 		r.setHitbox(new Hitbox(r));
 		// place a copy of the room back into the unused pool, as dead ends needs to be used multiple times
-		this.unusedRoomPool.add(new Room(r));
+		this.mUnusedRoomPool.add(new Room(r));
 		this.placeRoom(r, d);
 	}
 
 	private void placeRoom(Room testedRoom, Door testedDoor) {
 		//get the room
-		this.hitboxCollection.add(new Hitbox(testedRoom));
+		this.mHitboxCollection.add(new Hitbox(testedRoom));
 		Location pos = testedRoom.getLocation().clone();
 
 		//add new room's doors to the list of active doors
@@ -299,29 +299,29 @@ public class Dungeon {
 			if (d == testedDoor) {
 				continue;
 			}
-			this.unusedDoorPool.add(d);
+			this.mUnusedDoorPool.add(d);
 		}
 
 		// add objectives and chests
 		for (Objective o : testedRoom.getObjectiveList()) {
 			o.setLocation(pos.clone().add(o.getRelPos()));
-			this.objectivePotentialSpawnPoints.add(o);
+			this.mObjectivePotentialSpawnPoints.add(o);
 		}
 		for (LootChest c : testedRoom.getLootChestList()) {
 			c.setLocation(pos.clone().add(c.getRelPos()));
-			this.lootChestPotentialSpawnPoints.add(c);
+			this.mLootChestPotentialSpawnPoints.add(c);
 		}
 
 
 		// remove the room from the room pool
-		this.unusedRoomPool.remove(testedRoom);
+		this.mUnusedRoomPool.remove(testedRoom);
 		// add it to spawned room list
-		this.usedRooms.add(testedRoom);
+		this.mUsedRooms.add(testedRoom);
 	}
 
 	private List<Door> selectCompatibleDoors(RoomType type, BlockFace direction, Biome biome) {
 		List<Door> out = new ArrayList<>();
-		for (Room r : this.unusedRoomPool) {
+		for (Room r : this.mUnusedRoomPool) {
 			if (r.getType() == type) {
 				for (Door d: r.getDoorList()) {
 					if (d.correspondsTo(direction, biome)) {
@@ -343,7 +343,7 @@ public class Dungeon {
 				out.directLog("Calculation Failed... Retrying");
 				out = this.calculateWithRetries(maxAttempts - 1);
 			} else {
-				this.calculationException = e;
+				this.mCalculationException = e;
 				StringBuilder s = new StringBuilder();
 				s.append("Calculation Failed. Please contact a moderator, as our instance cannot be generated.\n");
 				s.append("Latest error:\n");
@@ -368,13 +368,13 @@ public class Dungeon {
 
 
 	public void spawn() {
-		if (this.status != DungeonStatus.CALCULATED) {
-			this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.status.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
+		if (this.mStatus != DungeonStatus.CALCULATED) {
+			this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.mStatus.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			return;
 		}
 		// sort rooms of different kinds in different lists. so that their order of spawn can be chosen
 		Map<RoomType, List<Room>> roomMap = new HashMap<>();
-		for (Room r : this.usedRooms) {
+		for (Room r : this.mUsedRooms) {
 			if (!roomMap.containsKey(r.getType())) {
 				roomMap.put(r.getType(), new ArrayList<>());
 			}
@@ -409,12 +409,12 @@ public class Dungeon {
 			this.directLog("Failed to generate instance: " + ex.getMessage());
 			Main.getInstance().getLogger().log(Level.WARNING, "Failed to generate instance", ex);
 		}
-		this.status = DungeonStatus.SPAWNED;
+		this.mStatus = DungeonStatus.SPAWNED;
 	}
 
 	private void openFirstPath() {
-		Location l = this.centerLoc.clone().add(0, 7, 2);
-		Bukkit.getScheduler().runTask(this.plugin, () -> {
+		Location l = this.mCenterLoc.clone().add(0, 7, 2);
+		Bukkit.getScheduler().runTask(this.mPlugin, () -> {
 			l.getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
 			l.clone().add(0, -1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
 			l.clone().add(0, 1, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
@@ -430,20 +430,20 @@ public class Dungeon {
 
 	private void spawnObjectives() {
 		this.directLog("Spawning objectives");
-		for (Objective o : this.selectedObjectives) {
+		for (Objective o : this.mSelectedObjectives) {
 			o.spawnObjective();
 		}
 	}
 
 	private void spawnChests() {
 		this.directLog("Spawning chests");
-		for (Objective o : this.objectivePotentialSpawnPoints) {
+		for (Objective o : this.mObjectivePotentialSpawnPoints) {
 			o.spawnChest();
 		}
-		for (LootChest c : this.selectedLootChests) {
+		for (LootChest c : this.mSelectedLootChests) {
 			c.spawnChest();
 		}
-		for (LootChest c : this.lootChestPotentialSpawnPoints) {
+		for (LootChest c : this.mLootChestPotentialSpawnPoints) {
 			c.spawnAir();
 		}
 	}
@@ -470,10 +470,10 @@ public class Dungeon {
 	}
 
 	private void directLog(Component component) {
-		if (!doDirectLog) {
+		if (!mDoDirectLog) {
 			return;
 		}
-		loggingAudience.sendMessage(Component.text("", NamedTextColor.AQUA)
+		mLoggingAudience.sendMessage(Component.text("", NamedTextColor.AQUA)
 			.append(component));
 	}
 }

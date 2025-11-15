@@ -25,12 +25,12 @@ import org.bukkit.plugin.Plugin;
 
 public class RL2Command {
 
-	private List<Room> rooms;
-	private final Plugin plugin;
+	private List<Room> mRooms;
+	private final Plugin mPlugin;
 
 	RL2Command(Plugin p) {
-		this.plugin = p;
-		this.rooms = FileParser.loadRooms(p, null);
+		this.mPlugin = p;
+		this.mRooms = FileParser.loadRooms(p, null);
 
 		CommandAPICommand helpCmd = new CommandAPICommand("help")
 			.executes((sender, args) -> {
@@ -41,8 +41,8 @@ public class RL2Command {
 			.executes((sender, args) -> {
 				accessCheck(sender);
 				Location loc = getSenderLocation(sender);
-				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
-					Dungeon dungeon = new Dungeon(this.rooms, loc, this.plugin, true);
+				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.mPlugin, () -> {
+					Dungeon dungeon = new Dungeon(this.mRooms, loc, this.mPlugin, true);
 					dungeon.calculateWithRetries(5);
 					dungeon.spawn();
 				});
@@ -59,14 +59,14 @@ public class RL2Command {
 				String roomId = Objects.requireNonNull(args.getByArgument(roomIdArg));
 				Location minLoc = Objects.requireNonNull(args.getByArgument(corner1));
 				Location maxLoc = Objects.requireNonNull(args.getByArgument(corner2));
-				new StructureParser(this.plugin, senderLoc, sender, roomId, minLoc, maxLoc).startParser();
+				new StructureParser(this.mPlugin, senderLoc, sender, roomId, minLoc, maxLoc).startParser();
 			});
 
 		CommandAPICommand reloadCommand = new CommandAPICommand("reload")
 			.executes((sender, args) -> {
 				accessCheck(sender);
-				this.rooms = FileParser.loadRooms(this.plugin, sender);
-				sender.sendMessage(this.rooms.size() + " Files reloaded");
+				this.mRooms = FileParser.loadRooms(this.mPlugin, sender);
+				sender.sendMessage(this.mRooms.size() + " Files reloaded");
 			});
 
 		IntegerArgument runCountArg = new IntegerArgument("Run Count");
@@ -88,8 +88,8 @@ public class RL2Command {
 				}
 
 				Location loc = getSenderLocation(sender);
-				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
-					DungeonReader reader = new DungeonReader(this.rooms, this.plugin, sender, loc);
+				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.mPlugin, () -> {
+					DungeonReader reader = new DungeonReader(this.mRooms, this.mPlugin, sender, loc);
 					reader.read(runCount);
 					reader.output();
 				});

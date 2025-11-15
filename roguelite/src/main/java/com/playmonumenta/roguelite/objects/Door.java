@@ -5,12 +5,12 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
 public class Door extends RoomObject {
-	private Room parentRoom;
+	private Room mParentRoom;
 
 	// basic constructor without arguments
 	public Door() {
 		super();
-		this.parentRoom = new Room();
+		this.mParentRoom = new Room();
 	}
 
 	// constructor with location and biome
@@ -19,7 +19,7 @@ public class Door extends RoomObject {
 		this.setLocation(loc);
 		this.setBiome(biome);
 		this.setDirection(dir);
-		this.parentRoom = new Room();
+		this.mParentRoom = new Room();
 	}
 
 	// copy constructor
@@ -28,19 +28,19 @@ public class Door extends RoomObject {
 		this.setBiome(old.getBiome());
 		this.setDirection(old.getDirection());
 		this.setLocation(old.getLocation().clone());
-		this.parentRoom = old.parentRoom;
+		this.mParentRoom = old.mParentRoom;
 	}
 
 	//getters
 
 	public Room getParentRoom() {
-		return parentRoom;
+		return mParentRoom;
 	}
 
 	//setters
 
 	public void setParentRoom(Room parentRoom) {
-		this.parentRoom = parentRoom;
+		this.mParentRoom = parentRoom;
 	}
 
 	public boolean correspondsTo(BlockFace direction, Biome biome) {

@@ -26,30 +26,30 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class DungeonReader {
 
-	private final List<Room> rooms;
-	private final Plugin plugin;
-	private final CommandSender sender;
-	private float progress;
-	private final Location loc;
+	private final List<Room> mRooms;
+	private final Plugin mPlugin;
+	private final CommandSender mSender;
+	private float mProgress;
+	private final Location mLoc;
 
-	private final Stats stats;
+	private final Stats mStats;
 
 	public DungeonReader(List<Room> r, Plugin p, CommandSender s, Location l) {
-		this.plugin = p;
-		this.rooms = r;
-		this.sender = s;
-		this.progress = 0;
-		this.loc = l.clone();
-		this.loc.setY(89);
-		this.stats = new Stats();
+		this.mPlugin = p;
+		this.mRooms = r;
+		this.mSender = s;
+		this.mProgress = 0;
+		this.mLoc = l.clone();
+		this.mLoc.setY(89);
+		this.mStats = new Stats();
 	}
 
 	public void read(int amount) {
-		BukkitTask progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.sender.sendMessage(Component.text(String.format("%.2f%%", this.progress))), 20L, 20L);
-		this.stats.addToTargetDungeonCount(amount);
+		BukkitTask progressMeterTask = Bukkit.getServer().getScheduler().runTaskTimer(this.mPlugin, () -> this.mSender.sendMessage(Component.text(String.format("%.2f%%", this.mProgress))), 20L, 20L);
+		this.mStats.addToTargetDungeonCount(amount);
 		for (int i = 0; i < amount; i++) {
-			this.progress = 100 * (float)i / amount;
-			Dungeon dungeon = new Dungeon(this.rooms, this.loc, this.plugin, false);
+			this.mProgress = 100 * (float)i / amount;
+			Dungeon dungeon = new Dungeon(this.mRooms, this.mLoc, this.mPlugin, false);
 			dungeon.calculateWithRetries(1);
 			this.readDungeon(dungeon);
 		}
@@ -57,34 +57,34 @@ public class DungeonReader {
 	}
 
 	private void readDungeon(Dungeon dungeon) {
-		if (dungeon.status == DungeonStatus.CALCULATED) {
-			this.stats.addToSuccessfulDungeonCount(1);
-			this.readRooms(dungeon.usedRooms);
-			this.stats.addToUnusedChestsTotal(dungeon.lootChestPotentialSpawnPoints.size());
+		if (dungeon.mStatus == DungeonStatus.CALCULATED) {
+			this.mStats.addToSuccessfulDungeonCount(1);
+			this.readRooms(dungeon.mUsedRooms);
+			this.mStats.addToUnusedChestsTotal(dungeon.mLootChestPotentialSpawnPoints.size());
 			this.readSpawnedChests(dungeon);
 		} else {
-			this.stats.addToUnsuccessfulDungeonCount(1);
+			this.mStats.addToUnsuccessfulDungeonCount(1);
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			if (dungeon.calculationException != null) {
-				dungeon.calculationException.printStackTrace(pw);
+			if (dungeon.mCalculationException != null) {
+				dungeon.mCalculationException.printStackTrace(pw);
 			}
-			this.stats.addToDungeonCalculationFailures(sw.toString(), 1);
+			this.mStats.addToDungeonCalculationFailures(sw.toString(), 1);
 		}
 	}
 
 	private void readRooms(List<Room> rooms) {
 		for (Room r : rooms) {
-			this.stats.addToRoomDistribution(r, 1);
+			this.mStats.addToRoomDistribution(r, 1);
 		}
 	}
 
 	private void readSpawnedChests(Dungeon dungeon) {
-		for (Objective o : dungeon.objectivePotentialSpawnPoints) {
-			this.stats.addToSpawnedChests(o, 1);
+		for (Objective o : dungeon.mObjectivePotentialSpawnPoints) {
+			this.mStats.addToSpawnedChests(o, 1);
 		}
-		for (LootChest c : dungeon.selectedLootChests) {
-			this.stats.addToSpawnedChests(c, 1);
+		for (LootChest c : dungeon.mSelectedLootChests) {
+			this.mStats.addToSpawnedChests(c, 1);
 		}
 	}
 
@@ -93,19 +93,19 @@ public class DungeonReader {
 
 		// normal file
 		String fileName = LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd-HH:mm:ss"));
-		String filePath = this.plugin.getDataFolder().getPath() + "/stats/" + fileName + ".txt";
+		String filePath = this.mPlugin.getDataFolder().getPath() + "/stats/" + fileName + ".txt";
 		File f = new File(filePath);
 		f.getParentFile().mkdirs();
 		try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
 			file.write(str);
 			file.flush();
-			this.sender.sendMessage(Component.text(filePath + " Written."));
+			this.mSender.sendMessage(Component.text(filePath + " Written."));
 		} catch (IOException e) {
 			Main.getInstance().getLogger().log(Level.WARNING, "Failed to save normal dungeon stats file", e);
 		}
 
 		// latest file
-		filePath = this.plugin.getDataFolder().getPath() + "/stats/latest.txt";
+		filePath = this.mPlugin.getDataFolder().getPath() + "/stats/latest.txt";
 		f = new File(filePath);
 		try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
 			file.write(str);
@@ -132,17 +132,17 @@ public class DungeonReader {
 	}
 
 	private void addHeader(StringBuilder str) {
-		str.append("Monumenta - Friendly Roguelite Experience Dungeon - Stats for ").append(this.stats.getTargetDungeonCount()).append(" dungeons\n");
-		long msElapsed = System.currentTimeMillis() - this.stats.getStartTime();
-		str.append(String.format("generated over %.2f seconds, with an average of %d nanoseconds per dungeon.\n\n", (float)msElapsed / 1000, msElapsed*1000 / this.stats.getTargetDungeonCount()));
+		str.append("Monumenta - Friendly Roguelite Experience Dungeon - Stats for ").append(this.mStats.getTargetDungeonCount()).append(" dungeons\n");
+		long msElapsed = System.currentTimeMillis() - this.mStats.getStartTime();
+		str.append(String.format("generated over %.2f seconds, with an average of %d nanoseconds per dungeon.\n\n", (float)msElapsed / 1000, msElapsed*1000 / this.mStats.getTargetDungeonCount()));
 	}
 
 	private void addDungeons(StringBuilder str) {
-		str.append("Dungeons: ").append(this.stats.getDungeonCount()).append("\n");
-		str.append(String.format("\t┣╾ Successful calculations: %d (%.1f%%)\n", this.stats.getSuccessfulDungeonCount(), 100 * ((float)this.stats.getSuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
-		str.append(String.format("\t┗╾ Unsuccessful calculations: %d (%.1f%%)\n", this.stats.getUnsuccessfulDungeonCount(), 100 * ((float)this.stats.getUnsuccessfulDungeonCount() / (float)this.stats.getDungeonCount())));
-		if (this.stats.getUnsuccessfulDungeonCount() > 0) {
-			Iterator<Map.Entry<String, Integer>> i = this.stats.getDungeonCalculationFailures().entrySet().iterator();
+		str.append("Dungeons: ").append(this.mStats.getDungeonCount()).append("\n");
+		str.append(String.format("\t┣╾ Successful calculations: %d (%.1f%%)\n", this.mStats.getSuccessfulDungeonCount(), 100 * ((float)this.mStats.getSuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
+		str.append(String.format("\t┗╾ Unsuccessful calculations: %d (%.1f%%)\n", this.mStats.getUnsuccessfulDungeonCount(), 100 * ((float)this.mStats.getUnsuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
+		if (this.mStats.getUnsuccessfulDungeonCount() > 0) {
+			Iterator<Map.Entry<String, Integer>> i = this.mStats.getDungeonCalculationFailures().entrySet().iterator();
 			while (i.hasNext()) {
 				Map.Entry<String, Integer> e = i.next();
 				String lineSymbol = "┣╾";
@@ -157,18 +157,18 @@ public class DungeonReader {
 	}
 
 	private void addUnusedChests(StringBuilder str) {
-		str.append(String.format("Unused Chests Markers: %d (%.1f/D)\n", this.stats.getUnusedChestsTotal(), (float)this.stats.getUnusedChestsTotal() / this.stats.getSuccessfulDungeonCount()));
+		str.append(String.format("Unused Chests Markers: %d (%.1f/D)\n", this.mStats.getUnusedChestsTotal(), (float)this.mStats.getUnusedChestsTotal() / this.mStats.getSuccessfulDungeonCount()));
 	}
 
 	private void addChests(StringBuilder str) {
 
-		int total = this.stats.getSpawnedChestsTotal();
-		int dc = this.stats.getSuccessfulDungeonCount();
+		int total = this.mStats.getSpawnedChestsTotal();
+		int dc = this.mStats.getSuccessfulDungeonCount();
 		str.append(String.format("Spawned Chests: %d (%.1f/D)\n", total, (float)total / dc));
 
-		int objectiveTotal = this.stats.getSpawnedChestsObjectiveTotal();
+		int objectiveTotal = this.mStats.getSpawnedChestsObjectiveTotal();
 		str.append(String.format("\t┣╾ Objective Chests: %d (%.1f/D) (%.1f%%)\n", objectiveTotal, (float)objectiveTotal / dc, 100 * (float)objectiveTotal / total));
-		Iterator<Map.Entry<Biome, Integer>> m = this.stats.getSpawnedChestsObjective().entrySet().iterator();
+		Iterator<Map.Entry<Biome, Integer>> m = this.mStats.getSpawnedChestsObjective().entrySet().iterator();
 		while (m.hasNext()) {
 			Map.Entry<Biome, Integer> e = m.next();
 			String lineSymbol = "┣╾";
@@ -178,9 +178,9 @@ public class DungeonReader {
 			str.append(String.format("\t┃  \t%s %s : %d (%.1f/D) (%.1f%%) (%.1f%% of objective chests)\n",
 				lineSymbol, e.getKey().name(), e.getValue(), (float)e.getValue()/dc, 100 * (float)e.getValue() / total, 100 * (float)e.getValue() / objectiveTotal));
 		}
-		int normalTotal = this.stats.getSpawnedChestsNormalTotal();
+		int normalTotal = this.mStats.getSpawnedChestsNormalTotal();
 		str.append(String.format("\t┗╾ Normal Chests: %d (%.1f/D) (%.1f%%)\n", normalTotal, (float)normalTotal / dc, 100 * (float)normalTotal / total));
-		m = this.stats.getSpawnedChestsNormal().entrySet().iterator();
+		m = this.mStats.getSpawnedChestsNormal().entrySet().iterator();
 		while (m.hasNext()) {
 			Map.Entry<Biome, Integer> e = m.next();
 			String lineSymbol = "┣╾";
@@ -194,10 +194,10 @@ public class DungeonReader {
 	}
 
 	private void addRoomDistribution(StringBuilder str) {
-		int total = this.stats.getRoomTotal();
-		int dc = this.stats.getSuccessfulDungeonCount();
+		int total = this.mStats.getRoomTotal();
+		int dc = this.mStats.getSuccessfulDungeonCount();
 		str.append(String.format("Rooms: %d (%.1f/D)\n", total, (float)total / dc));
-		Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.stats.getRoomTypeDistribution().entrySet().iterator();
+		Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.mStats.getRoomTypeDistribution().entrySet().iterator();
 		String typeLineSymbol = "┣╾";
 		String typeIntermediateSymbol = "┃";
 		while (typeIterator.hasNext()) {
@@ -206,7 +206,7 @@ public class DungeonReader {
 				typeLineSymbol = "┗╾";
 				typeIntermediateSymbol = " ";
 			}
-			Map<String, Integer> roomDistribution = this.stats.getRoomDistribution(typeEntry.getKey());
+			Map<String, Integer> roomDistribution = this.mStats.getRoomDistribution(typeEntry.getKey());
 			float goalValue = 0.0f;
 			String goalPresenceStr = "";
 			if (typeEntry.getKey() == RoomType.NORMAL) {
@@ -224,7 +224,7 @@ public class DungeonReader {
 				}
 				float presence = 100 * (float)idEntry.getValue() / dc;
 				String presenceError = "";
-				Integer roomWeight = this.stats.getRoomWeightMap().get(idEntry.getKey());
+				Integer roomWeight = this.mStats.getRoomWeightMap().get(idEntry.getKey());
 				if (roomWeight == null) {
 					continue;
 				}
@@ -233,10 +233,10 @@ public class DungeonReader {
 					double calculatedValue = roomWeight * (1 - (presence - goalValue) / 100);
 					if (presence < goalValue - maxDiffFromGoal) {
 						presenceError = String.format(" !!! Too Low %+.1f !!!", presence - goalValue);
-						this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, 1 + (int) calculatedValue)));
+						this.mSender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, 1 + (int) calculatedValue)));
 					} else if (presence > goalValue + maxDiffFromGoal) {
 						presenceError = String.format(" !!! Too High %+.1f !!!", presence - goalValue);
-						this.sender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, (int) calculatedValue)));
+						this.mSender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, (int) calculatedValue)));
 					}
 				}
 				str.append(String.format("\t%s \t%s %s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",

@@ -31,57 +31,57 @@ import org.bukkit.util.Vector;
 
 public class StructureParser {
 
-	private final Plugin plugin;
+	private final Plugin mPlugin;
 
-	private CommandSender sender;
-	private final String roomId;
-	private String fullRoomName = "Not Set";
-	private final Location lowLoc;
-	private final Location highLoc;
+	private CommandSender mSender;
+	private final String mRoomId;
+	private String mFullRoomName = "Not Set";
+	private final Location mLowLoc;
+	private final Location mHighLoc;
 
-	private final Room room;
+	private final Room mRoom;
 
 	StructureParser(Plugin plug, Location senderLoc, CommandSender sender, String roomId, Location corner1, Location corner2) {
-		this.plugin = plug;
-		this.sender = sender;
+		this.mPlugin = plug;
+		this.mSender = sender;
 		for (Player p : senderLoc.getWorld().getPlayers()) {
 			if (p.getLocation().distanceSquared(senderLoc) < 100) {
-				this.sender = p;
+				this.mSender = p;
 			}
 		}
-		this.roomId = roomId;
-		this.lowLoc = getActualCorner(corner1, corner2, false);
-		this.highLoc = getActualCorner(corner1, corner2, true);
-		this.room = new Room();
+		this.mRoomId = roomId;
+		this.mLowLoc = getActualCorner(corner1, corner2, false);
+		this.mHighLoc = getActualCorner(corner1, corner2, true);
+		this.mRoom = new Room();
 	}
 
 	void startParser() {
 		this.parser();
-		this.fullRoomName = this.room.getType().name() + "/" + this.roomId;
+		this.mFullRoomName = this.mRoom.getType().name() + "/" + this.mRoomId;
 
 		// Save the room
-		String path =  "roguelite/" + this.fullRoomName;
+		String path =  "roguelite/" + this.mFullRoomName;
 		// Start saving, and then run actions when complete
-		StructuresAPI.copyAreaAndSaveStructure(path, this.lowLoc, this.highLoc).whenComplete((unused, ex) -> {
+		StructuresAPI.copyAreaAndSaveStructure(path, this.mLowLoc, this.mHighLoc).whenComplete((unused, ex) -> {
 			// Saving complete
 			if (ex != null) {
 				// Completed with an error
-				this.sender.sendMessage(Component.text("Failed to save: " + ex.getMessage(), NamedTextColor.RED));
-				Main.getInstance().getLogger().log(Level.WARNING, ex, () -> "Failed to save " + this.roomId + ": ");
+				this.mSender.sendMessage(Component.text("Failed to save: " + ex.getMessage(), NamedTextColor.RED));
+				Main.getInstance().getLogger().log(Level.WARNING, ex, () -> "Failed to save " + this.mRoomId + ": ");
 			} else {
 				// Completed successfully
-				this.room.setPath(path);
-				String filePath = this.plugin.getDataFolder().getPath() + "/rooms/" + this.fullRoomName + ".json";
+				this.mRoom.setPath(path);
+				String filePath = this.mPlugin.getDataFolder().getPath() + "/rooms/" + this.mFullRoomName + ".json";
 				File f = new File(filePath);
 				f.getParentFile().mkdirs();
 				try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {
-					String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.room.toJsonObject());
+					String str = new GsonBuilder().setPrettyPrinting().create().toJson(this.mRoom.toJsonObject());
 					file.write(str);
 					file.flush();
-					this.sender.sendMessage(filePath + " Written.\nContent:" + str);
+					this.mSender.sendMessage(filePath + " Written.\nContent:" + str);
 				} catch (IOException e) {
-					this.sender.sendMessage(Component.text("Failed to save JSON: " + e.getMessage(), NamedTextColor.RED));
-					Main.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to save JSON " + this.roomId + ": ");
+					this.mSender.sendMessage(Component.text("Failed to save JSON: " + e.getMessage(), NamedTextColor.RED));
+					Main.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to save JSON " + this.mRoomId + ": ");
 				}
 			}
 		});
@@ -89,7 +89,7 @@ public class StructureParser {
 
 	private void parser() {
 		//go through every block of the structure
-		Vector rs = this.room.getSize();
+		Vector rs = this.mRoom.getSize();
 		for (int x = 0; x <= rs.getBlockX(); x++) {
 			for (int y = 0; y <= rs.getBlockY(); y++) {
 				for (int z = 0; z <= rs.getBlockZ(); z++) {
@@ -100,7 +100,7 @@ public class StructureParser {
 	}
 
 	private void parseBlockAtRel(int x, int y, int z) {
-		Block block = this.lowLoc.clone().add(x,y,z).getBlock();
+		Block block = this.mLowLoc.clone().add(x,y,z).getBlock();
 
 		switch (block.getType()) {
 			// Door blocks
@@ -146,35 +146,35 @@ public class StructureParser {
 		}
 		switch (block.getType()) {
 			case WHITE_CONCRETE:
-				this.room.setType(RoomType.NORMAL);
+				this.mRoom.setType(RoomType.NORMAL);
 				break;
 			case YELLOW_CONCRETE:
-				this.room.setType(RoomType.UTIL);
+				this.mRoom.setType(RoomType.UTIL);
 				break;
 			case RED_CONCRETE:
-				this.room.setType(RoomType.DEADEND);
+				this.mRoom.setType(RoomType.DEADEND);
 				break;
 			case LIME_CONCRETE:
-				this.room.setType(RoomType.END);
+				this.mRoom.setType(RoomType.END);
 				break;
 			case BLUE_CONCRETE:
-				this.room.setType(RoomType.CORRIDOR);
+				this.mRoom.setType(RoomType.CORRIDOR);
 				break;
 			//Weight blocks
 			case WHITE_GLAZED_TERRACOTTA:
-				this.room.setWeight(this.room.getWeight() + 1);
+				this.mRoom.setWeight(this.mRoom.getWeight() + 1);
 				break;
 			case LIGHT_BLUE_GLAZED_TERRACOTTA:
-				this.room.setWeight(this.room.getWeight() + 10);
+				this.mRoom.setWeight(this.mRoom.getWeight() + 10);
 				break;
 			case BLUE_GLAZED_TERRACOTTA:
-				this.room.setWeight(this.room.getWeight() + 100);
+				this.mRoom.setWeight(this.mRoom.getWeight() + 100);
 				break;
 			case GRAY_GLAZED_TERRACOTTA:
-				this.room.setWeight(this.room.getWeight() + 1000);
+				this.mRoom.setWeight(this.mRoom.getWeight() + 1000);
 				break;
 			case BLACK_GLAZED_TERRACOTTA:
-				this.room.setWeight(this.room.getWeight() + 10000);
+				this.mRoom.setWeight(this.mRoom.getWeight() + 10000);
 				break;
 			default:
 				// Other blocks have no significance
@@ -194,9 +194,9 @@ public class StructureParser {
 		BlockFace direction = Utils.rotateClockwise(((Directional)block.getBlockData()).getFacing());
 
 		// get the relative position
-		Vector relPos = block.getLocation().clone().subtract(this.lowLoc).toVector();
+		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
-		this.room.getLootChestList().add(new LootChest(direction, biome, relPos));
+		this.mRoom.getLootChestList().add(new LootChest(direction, biome, relPos));
 	}
 
 	private void parseObjective(Block block) {
@@ -217,9 +217,9 @@ public class StructureParser {
 		}
 
 		// get the relative position
-		Vector relPos = block.getLocation().clone().subtract(this.lowLoc).toVector();
+		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
-		this.room.getObjectiveList().add(new Objective(direction, biome, relPos));
+		this.mRoom.getObjectiveList().add(new Objective(direction, biome, relPos));
 
 	}
 
@@ -242,14 +242,14 @@ public class StructureParser {
 		}
 
 		// get the relative position
-		Vector relPos = block.getLocation().clone().subtract(this.lowLoc).toVector();
+		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
 		// create a door and add it to the doorList of the room
 		Door d = new Door();
 		d.setDirection(direction);
 		d.setBiome(biome);
 		d.setRelPos(relPos);
-		this.room.getDoorList().add(d);
+		this.mRoom.getDoorList().add(d);
 
 	}
 
@@ -270,13 +270,13 @@ public class StructureParser {
 	}
 
 	private BlockFace getObjectDirectionOnOuterShell(Block block) {
-		if (block.getLocation().getBlockX() == lowLoc.getBlockX()) {
+		if (block.getLocation().getBlockX() == mLowLoc.getBlockX()) {
 			return BlockFace.WEST;
-		} else if (block.getLocation().getBlockX() == highLoc.getBlockX()) {
+		} else if (block.getLocation().getBlockX() == mHighLoc.getBlockX()) {
 			return BlockFace.EAST;
-		} else if (block.getLocation().getBlockZ() == lowLoc.getBlockZ()) {
+		} else if (block.getLocation().getBlockZ() == mLowLoc.getBlockZ()) {
 			return BlockFace.NORTH;
-		} else if (block.getLocation().getBlockZ() == highLoc.getBlockZ()) {
+		} else if (block.getLocation().getBlockZ() == mHighLoc.getBlockZ()) {
 			return BlockFace.SOUTH;
 		} else {
 			return BlockFace.SELF;

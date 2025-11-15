@@ -8,73 +8,73 @@ import org.bukkit.util.Vector;
 
 public class RoomObject {
 	// direction the object is facing
-	private BlockFace direction;
+	private BlockFace mDirection;
 	// the biome of the object
-	private Biome biome;
+	private Biome mBiome;
 	// the relative position inside the room
-	private Vector relPos;
+	private Vector mRelPos;
 	// the ral location inside the world
-	private Location location;
+	private Location mLocation;
 
 
 	//basic constructor that sets fields variables to default values
 	public RoomObject() {
-		this.direction = BlockFace.SELF;
-		this.biome = Biome.NONE;
-		this.relPos = new Vector(0,0,0);
-		this.location = new Location(null, 0, 0, 0);
+		this.mDirection = BlockFace.SELF;
+		this.mBiome = Biome.NONE;
+		this.mRelPos = new Vector(0,0,0);
+		this.mLocation = new Location(null, 0, 0, 0);
 	}
 
 	//constructor with given variables
 	public RoomObject(BlockFace direction, Biome biome, Vector relPos) {
 		this();
-		this.direction = direction;
-		this.biome = biome;
-		this.relPos = relPos;
+		this.mDirection = direction;
+		this.mBiome = biome;
+		this.mRelPos = relPos;
 	}
 
 	//copy constructor
 	RoomObject(RoomObject old) {
-		this.direction = old.direction;
-		this.biome = old.biome;
-		this.relPos = old.relPos.clone();
-		this.location = old.location.clone();
+		this.mDirection = old.mDirection;
+		this.mBiome = old.mBiome;
+		this.mRelPos = old.mRelPos.clone();
+		this.mLocation = old.mLocation.clone();
 	}
 
 	// Setters
 
 	public void setDirection(BlockFace direction) {
-		this.direction = direction;
+		this.mDirection = direction;
 	}
 
 	public void setBiome(Biome biome) {
-		this.biome = biome;
+		this.mBiome = biome;
 	}
 
 	public void setRelPos(Vector relPos) {
-		this.relPos = relPos;
+		this.mRelPos = relPos;
 	}
 
 	public void setLocation(Location location) {
-		this.location = location;
+		this.mLocation = location;
 	}
 
 	// Getters
 
 	public BlockFace getDirection() {
-		return this.direction;
+		return this.mDirection;
 	}
 
 	public Biome getBiome() {
-		return this.biome;
+		return this.mBiome;
 	}
 
 	public Vector getRelPos() {
-		return this.relPos;
+		return this.mRelPos;
 	}
 
 	public Location getLocation() {
-		return location;
+		return mLocation;
 	}
 
 	// methods
