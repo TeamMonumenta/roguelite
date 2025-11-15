@@ -60,7 +60,7 @@ public class StructureParser {
 		this.mFullRoomName = this.mRoom.getType().name() + "/" + this.mRoomId;
 
 		// Save the room
-		String path =  "roguelite/" + this.mFullRoomName;
+		String path = "roguelite/" + this.mFullRoomName;
 		// Start saving, and then run actions when complete
 		StructuresAPI.copyAreaAndSaveStructure(path, this.mLowLoc, this.mHighLoc).whenComplete((unused, ex) -> {
 			// Saving complete
@@ -93,14 +93,14 @@ public class StructureParser {
 		for (int x = 0; x <= rs.getBlockX(); x++) {
 			for (int y = 0; y <= rs.getBlockY(); y++) {
 				for (int z = 0; z <= rs.getBlockZ(); z++) {
-					this.parseBlockAtRel(x,y,z);
+					this.parseBlockAtRel(x, y, z);
 				}
 			}
 		}
 	}
 
 	private void parseBlockAtRel(int x, int y, int z) {
-		Block block = this.mLowLoc.clone().add(x,y,z).getBlock();
+		Block block = this.mLowLoc.clone().add(x, y, z).getBlock();
 
 		switch (block.getType()) {
 			// Door blocks

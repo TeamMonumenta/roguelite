@@ -98,7 +98,7 @@ public class Dungeon {
 
 		// create the basic doors
 		this.mUnusedDoorPool = new ArrayList<>();
-		this.mUnusedDoorPool.add(new Door(this.mCenterLoc.clone().add(0,4,3), Biome.getRandom(), BlockFace.SOUTH));
+		this.mUnusedDoorPool.add(new Door(this.mCenterLoc.clone().add(0, 4, 3), Biome.getRandom(), BlockFace.SOUTH));
 
 		// create hitboxes
 		this.mHitboxCollection = new ArrayList<>();
@@ -121,7 +121,7 @@ public class Dungeon {
 	private void calculate() throws Exception {
 		// only calculate if the dungeon is initialized
 		if (this.mStatus != DungeonStatus.INITIALIZED) {
-			this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.mStatus.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
+			this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.mStatus.name() + " Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			throw new Exception("Dungeon calculation aborted: Dungeon is not initialised.");
 		}
 		this.mCurrentIteration = 1;
@@ -369,7 +369,7 @@ public class Dungeon {
 
 	public void spawn() {
 		if (this.mStatus != DungeonStatus.CALCULATED) {
-			this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.mStatus.name() + "  Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
+			this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.mStatus.name() + " Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			return;
 		}
 		// sort rooms of different kinds in different lists. so that their order of spawn can be chosen

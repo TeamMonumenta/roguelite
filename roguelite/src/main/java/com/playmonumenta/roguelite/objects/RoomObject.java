@@ -21,7 +21,7 @@ public class RoomObject {
 	public RoomObject() {
 		this.mDirection = BlockFace.SELF;
 		this.mBiome = Biome.NONE;
-		this.mRelPos = new Vector(0,0,0);
+		this.mRelPos = new Vector(0, 0, 0);
 		this.mLocation = new Location(null, 0, 0, 0);
 	}
 

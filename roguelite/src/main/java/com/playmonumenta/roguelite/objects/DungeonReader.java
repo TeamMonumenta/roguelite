@@ -26,6 +26,17 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class DungeonReader {
 
+	// No-Break Space
+	private static final String NO_BREAK_SPACE = "\u00a0";
+	// Indent with no line next to it
+	private static final String BLANK_INDENT = NO_BREAK_SPACE.repeat(3) + " ";
+	// Indent with a line next to it
+	private static final String LINE_INDENT = "│" + NO_BREAK_SPACE.repeat(2) + " ";
+	// Item with further items
+	private static final String ITEM_WITH_CONTINUATION = "├── ";
+	// Item with no further items
+	private static final String ITEM_WITHOUT_CONTINUATION = "└── ";
+
 	private final List<Room> mRooms;
 	private final Plugin mPlugin;
 	private final CommandSender mSender;
@@ -115,11 +126,11 @@ public class DungeonReader {
 		}
 	}
 
-    /*
+	/*
 
-    STRING BUILDER
+	STRING BUILDER
 
-     */
+	*/
 
 	private String getOutputString() {
 		StringBuilder str = new StringBuilder();
@@ -139,18 +150,15 @@ public class DungeonReader {
 
 	private void addDungeons(StringBuilder str) {
 		str.append("Dungeons: ").append(this.mStats.getDungeonCount()).append("\n");
-		str.append(String.format("\t┣╾ Successful calculations: %d (%.1f%%)\n", this.mStats.getSuccessfulDungeonCount(), 100 * ((float)this.mStats.getSuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
-		str.append(String.format("\t┗╾ Unsuccessful calculations: %d (%.1f%%)\n", this.mStats.getUnsuccessfulDungeonCount(), 100 * ((float)this.mStats.getUnsuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
+		str.append(String.format("%sSuccessful calculations: %d (%.1f%%)\n", ITEM_WITH_CONTINUATION, this.mStats.getSuccessfulDungeonCount(), 100 * ((float)this.mStats.getSuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
+		str.append(String.format("%sUnsuccessful calculations: %d (%.1f%%)\n", ITEM_WITHOUT_CONTINUATION, this.mStats.getUnsuccessfulDungeonCount(), 100 * ((float)this.mStats.getUnsuccessfulDungeonCount() / (float)this.mStats.getDungeonCount())));
 		if (this.mStats.getUnsuccessfulDungeonCount() > 0) {
-			Iterator<Map.Entry<String, Integer>> i = this.mStats.getDungeonCalculationFailures().entrySet().iterator();
-			while (i.hasNext()) {
-				Map.Entry<String, Integer> e = i.next();
-				String lineSymbol = "┣╾";
-				if (!i.hasNext()) {
-					lineSymbol = "┗╾";
-				}
-				str.append(String.format("\t   \t%s %d : %s\n",
-					lineSymbol, e.getValue(), e.getKey()));
+			Iterator<Map.Entry<String, Integer>> it = this.mStats.getDungeonCalculationFailures().entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, Integer> e = it.next();
+				String lineSymbol = it.hasNext() ? ITEM_WITH_CONTINUATION : ITEM_WITHOUT_CONTINUATION;
+				str.append(String.format("%s%s%d : %s\n",
+					BLANK_INDENT, lineSymbol, e.getValue(), e.getKey()));
 			}
 		}
 		str.append("\n\n");
@@ -167,28 +175,22 @@ public class DungeonReader {
 		str.append(String.format("Spawned Chests: %d (%.1f/D)\n", total, (float)total / dc));
 
 		int objectiveTotal = this.mStats.getSpawnedChestsObjectiveTotal();
-		str.append(String.format("\t┣╾ Objective Chests: %d (%.1f/D) (%.1f%%)\n", objectiveTotal, (float)objectiveTotal / dc, 100 * (float)objectiveTotal / total));
-		Iterator<Map.Entry<Biome, Integer>> m = this.mStats.getSpawnedChestsObjective().entrySet().iterator();
-		while (m.hasNext()) {
-			Map.Entry<Biome, Integer> e = m.next();
-			String lineSymbol = "┣╾";
-			if (!m.hasNext()) {
-				lineSymbol = "┗╾";
-			}
-			str.append(String.format("\t┃  \t%s %s : %d (%.1f/D) (%.1f%%) (%.1f%% of objective chests)\n",
-				lineSymbol, e.getKey().name(), e.getValue(), (float)e.getValue()/dc, 100 * (float)e.getValue() / total, 100 * (float)e.getValue() / objectiveTotal));
+		str.append(String.format("%sObjective Chests: %d (%.1f/D) (%.1f%%)\n", ITEM_WITH_CONTINUATION, objectiveTotal, (float)objectiveTotal / dc, 100 * (float)objectiveTotal / total));
+		Iterator<Map.Entry<Biome, Integer>> it = this.mStats.getSpawnedChestsObjective().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Biome, Integer> e = it.next();
+			String lineSymbol = it.hasNext() ? ITEM_WITH_CONTINUATION : ITEM_WITHOUT_CONTINUATION;
+			str.append(String.format("%s%s%s : %d (%.1f/D) (%.1f%%) (%.1f%% of objective chests)\n",
+				LINE_INDENT, lineSymbol, e.getKey().name(), e.getValue(), (float)e.getValue()/dc, 100 * (float)e.getValue() / total, 100 * (float)e.getValue() / objectiveTotal));
 		}
 		int normalTotal = this.mStats.getSpawnedChestsNormalTotal();
-		str.append(String.format("\t┗╾ Normal Chests: %d (%.1f/D) (%.1f%%)\n", normalTotal, (float)normalTotal / dc, 100 * (float)normalTotal / total));
-		m = this.mStats.getSpawnedChestsNormal().entrySet().iterator();
-		while (m.hasNext()) {
-			Map.Entry<Biome, Integer> e = m.next();
-			String lineSymbol = "┣╾";
-			if (!m.hasNext()) {
-				lineSymbol = "┗╾";
-			}
-			str.append(String.format("\t   \t%s %s : %d (%.1f/D) (%.1f%%) (%.1f%% of normal chests)\n",
-				lineSymbol, e.getKey().name(), e.getValue(), (float)e.getValue()/dc, 100 * (float)e.getValue() / total, 100 * (float)e.getValue() / normalTotal));
+		str.append(String.format("%sNormal Chests: %d (%.1f/D) (%.1f%%)\n", ITEM_WITHOUT_CONTINUATION, normalTotal, (float)normalTotal / dc, 100 * (float)normalTotal / total));
+		it = this.mStats.getSpawnedChestsNormal().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Biome, Integer> e = it.next();
+			String lineSymbol = it.hasNext() ? ITEM_WITH_CONTINUATION : ITEM_WITHOUT_CONTINUATION;
+			str.append(String.format("%s%s%s : %d (%.1f/D) (%.1f%%) (%.1f%% of normal chests)\n",
+				BLANK_INDENT, lineSymbol, e.getKey().name(), e.getValue(), (float)e.getValue()/dc, 100 * (float)e.getValue() / total, 100 * (float)e.getValue() / normalTotal));
 		}
 		str.append("\n\n");
 	}
@@ -198,13 +200,13 @@ public class DungeonReader {
 		int dc = this.mStats.getSuccessfulDungeonCount();
 		str.append(String.format("Rooms: %d (%.1f/D)\n", total, (float)total / dc));
 		Iterator<Map.Entry<RoomType, Integer>> typeIterator = this.mStats.getRoomTypeDistribution().entrySet().iterator();
-		String typeLineSymbol = "┣╾";
-		String typeIntermediateSymbol = "┃";
+		String typeLineSymbol = ITEM_WITH_CONTINUATION;
+		String typeIntermediateSymbol = LINE_INDENT;
 		while (typeIterator.hasNext()) {
 			Map.Entry<RoomType, Integer> typeEntry = typeIterator.next();
 			if (!typeIterator.hasNext()) {
-				typeLineSymbol = "┗╾";
-				typeIntermediateSymbol = " ";
+				typeLineSymbol = ITEM_WITHOUT_CONTINUATION;
+				typeIntermediateSymbol = BLANK_INDENT;
 			}
 			Map<String, Integer> roomDistribution = this.mStats.getRoomDistribution(typeEntry.getKey());
 			float goalValue = 0.0f;
@@ -213,19 +215,20 @@ public class DungeonReader {
 				goalValue = (float)typeEntry.getValue() / dc / roomDistribution.size() * 100.0f;
 				goalPresenceStr = String.format(" (Goal Presence: %.1f%%)", goalValue);
 			}
-			str.append(String.format("\t%s %s: %d (%.1f/D)%s\n", typeLineSymbol, typeEntry.getKey().name(), typeEntry.getValue(), (float)typeEntry.getValue() / dc, goalPresenceStr));
+			str.append(String.format("%s%s: %d (%.1f/D)%s\n", typeLineSymbol, typeEntry.getKey().name(), typeEntry.getValue(), (float)typeEntry.getValue() / dc, goalPresenceStr));
 			Iterator<Map.Entry<String, Integer>> idIterator = roomDistribution.entrySet().iterator();
 			int iteratorLength = roomDistribution.size();
-			String idLineSymbol = "┣╾";
+			String idLineSymbol = ITEM_WITH_CONTINUATION;
 			while (idIterator.hasNext()) {
 				Map.Entry<String, Integer> idEntry = idIterator.next();
 				if (!idIterator.hasNext()) {
-					idLineSymbol = "┗╾";
+					idLineSymbol = ITEM_WITHOUT_CONTINUATION;
 				}
 				float presence = 100 * (float)idEntry.getValue() / dc;
 				String presenceError = "";
 				Integer roomWeight = this.mStats.getRoomWeightMap().get(idEntry.getKey());
 				if (roomWeight == null) {
+					// Won't happen, just satisfying nullaway
 					continue;
 				}
 				if (typeEntry.getKey() == RoomType.NORMAL) {
@@ -239,7 +242,7 @@ public class DungeonReader {
 						this.mSender.sendMessage(Component.text(String.format("%s: %d -> %d", idEntry.getKey(), roomWeight, (int) calculatedValue)));
 					}
 				}
-				str.append(String.format("\t%s \t%s %s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",
+				str.append(String.format("%s%s%s: %d (%.1f%% Total) (%.1f%% %s) (%.1f%% Presence%s) (Weight: %d)\n",
 					typeIntermediateSymbol, idLineSymbol, idEntry.getKey(), idEntry.getValue(),
 					100 * (float)idEntry.getValue() / total, 100 * (float)idEntry.getValue() / typeEntry.getValue(), typeEntry.getKey().name(),
 					presence, presenceError, roomWeight));
