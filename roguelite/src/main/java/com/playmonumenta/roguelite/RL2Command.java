@@ -6,9 +6,9 @@ import com.playmonumenta.roguelite.objects.Room;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
+import dev.jorel.commandapi.arguments.MultiLiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import java.util.List;
@@ -69,7 +69,7 @@ public class RL2Command {
 			});
 
 		IntegerArgument runCountArg = new IntegerArgument("Run Count");
-		LiteralArgument forceArg = new LiteralArgument("confirm");
+		MultiLiteralArgument forceArg = new MultiLiteralArgument("Force", "confirm");
 		CommandAPICommand statsCommand = new CommandAPICommand("stats")
 			.withArguments(runCountArg)
 			.withOptionalArguments(forceArg)
@@ -77,7 +77,7 @@ public class RL2Command {
 				accessCheck(sender);
 
 				int runCount = args.getByArgumentOrDefault(runCountArg, 1);
-				final boolean force = args.getByArgument(forceArg) != null;
+				boolean force = args.getByArgumentOrDefault(forceArg, null) != null;
 
 				if (runCount > 10000 && !force) {
 					throw CommandAPI.failWithString(String.format(
