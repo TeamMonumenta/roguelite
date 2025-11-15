@@ -5,6 +5,7 @@ import com.playmonumenta.roguelite.objects.DungeonReader;
 import com.playmonumenta.roguelite.objects.Room;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
@@ -95,6 +96,7 @@ public class RL2Command {
 			});
 
 		new CommandAPICommand("roguelite")
+			.withPermission(CommandPermission.fromString("monumenta.roguelite"))
 			.withSubcommand(helpCmd)
 			.withSubcommand(generateCmd)
 			.withSubcommand(saveStructureCommand)
