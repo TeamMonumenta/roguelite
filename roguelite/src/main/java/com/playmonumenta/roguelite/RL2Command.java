@@ -111,13 +111,15 @@ public class RL2Command {
 		}
 	}
 
-	// displays help message for the command /rl2
+	// Displays help message for the command /rl2
 	private void rl2Help(CommandSender sender) {
 		sender.sendMessage(Component.text("rl2 - Roguelite dungeon plugin", NamedTextColor.GREEN));
 		sender.sendMessage(Component.text("available sub-commands:", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("/rl2 help | Shows this message", NamedTextColor.GREEN));
 		sender.sendMessage(Component.text("/rl2 generate | Dungeon generation (WARNING: STARTS A DUNGEON GENERATION WITHOUT WARNING. IT IS NOT UNDOABLE)", NamedTextColor.GREEN));
 		sender.sendMessage(Component.text("/rl2 reload | reloads internal data files", NamedTextColor.GREEN));
 		sender.sendMessage(Component.text("/rl2 savestructure | save a in-game structure into internal data files", NamedTextColor.GREEN));
+		sender.sendMessage(Component.text("/rl2 stats | shows the stats of various details over a lot of dungeons", NamedTextColor.GREEN));
 	}
 
 	private static Location getSenderLocation(CommandSender sender) throws WrapperCommandSyntaxException {

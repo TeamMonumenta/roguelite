@@ -89,24 +89,24 @@ public class Dungeon {
 		this.mCenterLoc = this.mMasterLocation;
 		Location cl = this.mCenterLoc;
 
-		// get a copy of the room pool
+		// Get a copy of the room pool
 		for (Room r : this.mMasterRoomPool) {
 			if (r.getWeight() != 0) {
 				mUnusedRoomPool.add(new Room(r));
 			}
 		}
 
-		// create the basic doors
+		// Create the basic doors
 		this.mUnusedDoorPool = new ArrayList<>();
 		this.mUnusedDoorPool.add(new Door(this.mCenterLoc.clone().add(0, 4, 3), Biome.getRandom(), BlockFace.SOUTH));
 
-		// create hitboxes
+		// Create hitboxes
 		this.mHitboxCollection = new ArrayList<>();
-		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-18, -88, -28), cl.clone().add(15, 166, 3))); //Central box
-		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, -136), cl.clone().add(128, 166, -132))); //north instance limit
-		this.mHitboxCollection.add(new Hitbox(cl.clone().add(128, -89, -132), cl.clone().add(132, 166, 123))); //east instance limit
-		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, 123), cl.clone().add(128, 166, 127))); //south instance limit
-		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -132), cl.clone().add(-127, 166, 123))); //west instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-18, -88, -28), cl.clone().add(15, 166, 3))); // Central box
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, -136), cl.clone().add(128, 166, -132))); // North instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(128, -89, -132), cl.clone().add(132, 166, 123))); // East instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, 123), cl.clone().add(128, 166, 127))); // South instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -132), cl.clone().add(-127, 166, 123))); // West instance limit
 
 		this.mStatus = DungeonStatus.INITIALIZED;
 		return this;
@@ -119,14 +119,14 @@ public class Dungeon {
 	 */
 
 	private void calculate() throws Exception {
-		// only calculate if the dungeon is initialized
+		// Only calculate if the dungeon is initialized
 		if (this.mStatus != DungeonStatus.INITIALIZED) {
 			this.directLog(Component.text("Dungeon calculation aborted: Dungeon is not initialised. \nCurrent status: " + this.mStatus.name() + " Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			throw new Exception("Dungeon calculation aborted: Dungeon is not initialised.");
 		}
 		this.mCurrentIteration = 1;
 
-		// main generation loop
+		// Main generation loop
 		this.mainGenerationLoop();
 
 		this.selectObjectives();
@@ -143,7 +143,7 @@ public class Dungeon {
 	}
 
 	private void selectObjectives() {
-		// among the list of possible objective spawns, select 3 to be actual objective ender crystals
+		// Among the list of possible objective spawns, select 3 to be actual objective ender crystals;
 		// others will become chests
 		Random rand = new Random();
 		this.mSelectedObjectives.add(this.mObjectivePotentialSpawnPoints.remove(rand.nextInt(this.mObjectivePotentialSpawnPoints.size())));
@@ -152,7 +152,7 @@ public class Dungeon {
 	}
 
 	private void selectChests() {
-		// among the list of possible chests spawn, select enough, at random, to get a total chest count equal as the
+		// Among the list of possible chests spawn, select enough, at random, to get a total chest count equal as the
 		// count specified in config class. others won't spawn.
 		int amountToSpawn = Config.CHEST_COUNT - this.mObjectivePotentialSpawnPoints.size();
 		Random rand = new Random();
@@ -168,19 +168,19 @@ public class Dungeon {
 		int roomsToSpawnUtil = 0;
 
 		while (!this.mUnusedDoorPool.isEmpty()) {
-			// select a random door from the list of opened doors.
+			// Select a random door from the list of opened doors.
 			Door currentDoor = this.mUnusedDoorPool.remove(new Random().nextInt(this.mUnusedDoorPool.size()));
 			currentDoor.getLocation().setWorld(mCenterLoc.getWorld());
 
 			boolean result = false;
 
-			// if the door is further than the distance threshold or the amount of rooms is enough, generate a deadend
+			// If the door is further than the distance threshold or the amount of rooms is enough, generate a deadend
 			if (this.mCurrentIteration > Config.ROOMS_TO_SPAWN) {
 				this.generateDeadend(currentDoor);
 				continue;
 			}
 
-			// sets room type priorities
+			// Sets room type priorities
 			if (this.mCurrentIteration == 25 && !generatedDeadend) {
 				roomsToSpawnEnd++;
 			}
@@ -189,7 +189,7 @@ public class Dungeon {
 			}
 
 
-			// attempt to spawn a room following a priority queue
+			// Attempt to spawn a room following a priority queue
 			if (roomsToSpawnEnd > 0) {
 				result = this.attemptGenerateRoom(currentDoor, RoomType.END);
 				if (result) {
@@ -208,7 +208,7 @@ public class Dungeon {
 
 
 			if (!result) {
-				// if the room is not correctly spawned
+				// If the room is not correctly spawned
 				this.generateDeadend(currentDoor);
 				generatedDeadend = true;
 			} else {
@@ -234,22 +234,22 @@ public class Dungeon {
 	}
 
 	private boolean attemptGenerateRoom(Door curDoor, RoomType roomType) {
-		// go though every unused room, and list the doors that can connect with the current door.
+		// Go though every unused room, and list the doors that can connect with the current door.
 		List<Door> compatibleDoors = this.selectCompatibleDoors(roomType, curDoor.getDirection(), curDoor.getBiome());
 
-		// go though all these doors, at random. until one of them yields a compatible room, or no doors is left to test
+		// Go though all these doors, at random. until one of them yields a compatible room, or no doors is left to test
 		boolean success = false;
 		Room testedRoom;
 		Door testedDoor = new Door();
 		while (!compatibleDoors.isEmpty()) {
-			// get a random door
+			// Get a random door
 			testedDoor = Utils.getRandomDoorFromWeightedList(compatibleDoors);
-			// get this door's room
+			// Get this door's room
 			testedRoom = testedDoor.getParentRoom();
-			// find this room coordinates, and calculate its (if supposedly spawned) hitbox
+			// Find this room coordinates, and calculate its (if supposedly spawned) hitbox
 			testedRoom.setLocation(curDoor.getLocation().clone().subtract(testedDoor.getRelPos()));
 			testedRoom.setHitbox(new Hitbox(testedRoom));
-			// test if that new room hitbox collides with the already spawned ones
+			// Test if that new room hitbox collides with the already spawned ones
 			boolean isColliding = false;
 			for (Hitbox h : this.mHitboxCollection) {
 				if (testedRoom.getHitbox().collidesWith(h)) {
@@ -264,7 +264,7 @@ public class Dungeon {
 			compatibleDoors.remove(testedDoor);
 		}
 		if (!success) {
-			// no compatible room found. abort the method, and fallback.
+			// No compatible room found. abort the method, and fallback.
 			return false;
 		}
 
@@ -276,23 +276,23 @@ public class Dungeon {
 
 	private void generateDeadend(Door curDoor) {
 		List<Door> compatibleDoors = this.selectCompatibleDoors(RoomType.DEADEND, curDoor.getDirection().getOppositeFace(), curDoor.getBiome());
-		Door d = compatibleDoors.get(0); //there should be only 1 compatible deadend
-		// get this door's room
+		Door d = compatibleDoors.get(0); // There should be only 1 compatible deadend
+		// Get this door's room
 		Room r = d.getParentRoom();
-		// find this room coordinates, and calculate its hitbox
+		// Find this room coordinates, and calculate its hitbox
 		r.setLocation(curDoor.getLocation().clone().subtract(d.getRelPos()));
 		r.setHitbox(new Hitbox(r));
-		// place a copy of the room back into the unused pool, as dead ends needs to be used multiple times
+		// Place a copy of the room back into the unused pool, as dead ends needs to be used multiple times
 		this.mUnusedRoomPool.add(new Room(r));
 		this.placeRoom(r, d);
 	}
 
 	private void placeRoom(Room testedRoom, Door testedDoor) {
-		//get the room
+		// Get the room
 		this.mHitboxCollection.add(new Hitbox(testedRoom));
 		Location pos = testedRoom.getLocation().clone();
 
-		//add new room's doors to the list of active doors
+		// Add new room's doors to the list of active doors
 		List<Door> newDoors = testedRoom.getDoorList();
 		for (Door d : newDoors) {
 			d.setLocation(pos.clone().add(d.getRelPos()));
@@ -302,7 +302,7 @@ public class Dungeon {
 			this.mUnusedDoorPool.add(d);
 		}
 
-		// add objectives and chests
+		// Add objectives and chests
 		for (Objective o : testedRoom.getObjectiveList()) {
 			o.setLocation(pos.clone().add(o.getRelPos()));
 			this.mObjectivePotentialSpawnPoints.add(o);
@@ -313,9 +313,9 @@ public class Dungeon {
 		}
 
 
-		// remove the room from the room pool
+		// Remove the room from the room pool
 		this.mUnusedRoomPool.remove(testedRoom);
-		// add it to spawned room list
+		// Add it to spawned room list
 		this.mUsedRooms.add(testedRoom);
 	}
 
@@ -372,7 +372,7 @@ public class Dungeon {
 			this.directLog(Component.text("Dungeon spawn aborted: Dungeon is not calculated. \nCurrent status: " + this.mStatus.name() + " Should be: " + DungeonStatus.INITIALIZED.name(), NamedTextColor.DARK_RED));
 			return;
 		}
-		// sort rooms of different kinds in different lists. so that their order of spawn can be chosen
+		// Sort rooms of different kinds in different lists. so that their order of spawn can be chosen
 		Map<RoomType, List<Room>> roomMap = new HashMap<>();
 		for (Room r : this.mUsedRooms) {
 			if (!roomMap.containsKey(r.getType())) {
@@ -381,7 +381,7 @@ public class Dungeon {
 			roomMap.get(r.getType()).add(r);
 		}
 
-		// spawn things
+		// Spawn things
 		try {
 
 			// Load main rooms

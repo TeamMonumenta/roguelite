@@ -16,15 +16,15 @@ public class Utils {
 	}
 
 	public static Door getRandomDoorFromWeightedList(List<Door> list) {
-		// compute total weight
+		// Compute total weight
 		double totalWeight = 0.0d;
 		for (Door d : list) {
 			totalWeight += d.getParentRoom().getWeight();
 		}
-		// get a random
+		// Get a random
 		int randomIndex = -1;
 		double random = Math.random() * totalWeight;
-		// select
+		// Select
 		for (int i = 0; i < list.size(); i++) {
 			random -= list.get(i).getParentRoom().getWeight();
 			if (random <= 0.0d) {

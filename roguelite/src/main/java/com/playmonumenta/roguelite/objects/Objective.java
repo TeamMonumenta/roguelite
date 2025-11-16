@@ -10,17 +10,17 @@ import org.bukkit.util.Vector;
 
 public class Objective extends RoomObject {
 
-	// basic constructor with default values
+	// Basic constructor with default values
 	public Objective() {
 		super();
 	}
 
-	// basic constructor with given RoomObject values
+	// Basic constructor with given RoomObject values
 	public Objective(BlockFace direction, Biome biome, Vector relPos) {
 		super(direction, biome, relPos);
 	}
 
-	// copy constructor
+	// Copy constructor
 	public Objective(Objective old) {
 		super(old);
 	}

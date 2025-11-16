@@ -7,17 +7,17 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
 public class RoomObject {
-	// direction the object is facing
+	// Direction the object is facing
 	private BlockFace mDirection;
-	// the biome of the object
+	// The biome of the object
 	private Biome mBiome;
-	// the relative position inside the room
+	// The relative position inside the room
 	private Vector mRelPos;
-	// the ral location inside the world
+	// The ral location inside the world
 	private Location mLocation;
 
 
-	//basic constructor that sets fields variables to default values
+	// Basic constructor that sets fields variables to default values
 	public RoomObject() {
 		this.mDirection = BlockFace.SELF;
 		this.mBiome = Biome.NONE;
@@ -25,7 +25,7 @@ public class RoomObject {
 		this.mLocation = new Location(null, 0, 0, 0);
 	}
 
-	//constructor with given variables
+	// Constructor with given variables
 	public RoomObject(BlockFace direction, Biome biome, Vector relPos) {
 		this();
 		this.mDirection = direction;
@@ -33,7 +33,7 @@ public class RoomObject {
 		this.mRelPos = relPos;
 	}
 
-	//copy constructor
+	// Copy constructor
 	RoomObject(RoomObject old) {
 		this.mDirection = old.mDirection;
 		this.mBiome = old.mBiome;
@@ -77,7 +77,7 @@ public class RoomObject {
 		return mLocation;
 	}
 
-	// methods
+	// Methods
 
 	public JsonObject toJsonObject() {
 		JsonObject out = new JsonObject();

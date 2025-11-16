@@ -89,7 +89,7 @@ public class StructureParser {
 	}
 
 	private void parser() {
-		//go through every block of the structure
+		// Go through every block of the structure
 		Vector rs = this.mRoom.getSize();
 		for (int x = 0; x <= rs.getBlockX(); x++) {
 			for (int y = 0; y <= rs.getBlockY(); y++) {
@@ -111,18 +111,18 @@ public class StructureParser {
 			case GRAY_STAINED_GLASS:
 				this.parseDoor(block);
 				break;
-			//Objectives blocks
+			// Objectives blocks
 			case WHITE_BANNER:
 			case BLUE_BANNER:
 			case GREEN_BANNER:
 			case GRAY_BANNER:
 				this.parseObjective(block);
 				break;
-			//Loot Chest Blocks
+			// Loot Chest Blocks
 			case MAGENTA_GLAZED_TERRACOTTA:
 				this.parseChest(block);
 				break;
-			//Room Type Blocks
+			// Room Type Blocks
 			case WHITE_CONCRETE:
 			case YELLOW_CONCRETE:
 			case RED_CONCRETE:
@@ -161,7 +161,7 @@ public class StructureParser {
 			case BLUE_CONCRETE:
 				this.mRoom.setType(RoomType.CORRIDOR);
 				break;
-			//Weight blocks
+			// Weight blocks
 			case WHITE_GLAZED_TERRACOTTA:
 				this.mRoom.setWeight(this.mRoom.getWeight() + 1);
 				break;
@@ -184,17 +184,17 @@ public class StructureParser {
 	}
 
 	private void parseChest(Block block) {
-		//if the block above it is not a biome glass, then it is not a loot chest
+		// If the block above it is not a biome glass, then it is not a loot chest
 		// in the meantime, get that biome
 		Biome biome = this.getBiomeFromGlassOrBanner(block.getRelative(BlockFace.UP));
 		if (biome == Biome.NONE) {
 			return;
 		}
 
-		// get the direction
+		// Get the direction
 		BlockFace direction = Utils.rotateClockwise(((Directional)block.getBlockData()).getFacing());
 
-		// get the relative position
+		// Get the relative position
 		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
 		this.mRoom.getLootChestList().add(new LootChest(direction, biome, relPos));
@@ -203,21 +203,21 @@ public class StructureParser {
 	private void parseObjective(Block block) {
 
 		Banner banner = (Banner)block.getState();
-		// if the banner has patterns, then it is not an objective marker
+		// If the banner has patterns, then it is not an objective marker
 		if (banner.numberOfPatterns() > 0) {
 			return;
 		}
 
-		// get the direction
+		// Get the direction
 		BlockFace direction = ((Rotatable)banner.getBlockData()).getRotation();
 
-		// get the biome
+		// Get the biome
 		Biome biome = getBiomeFromGlassOrBanner(block);
 		if (biome == Biome.NONE) {
 			return;
 		}
 
-		// get the relative position
+		// Get the relative position
 		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
 		this.mRoom.getObjectiveList().add(new Objective(direction, biome, relPos));
@@ -225,27 +225,27 @@ public class StructureParser {
 	}
 
 	private void parseDoor(Block block) {
-		// make sure it is a door, by checking if the block above is a doorframe block
+		// Make sure it is a door, by checking if the block above is a doorframe block
 		if (block.getRelative(BlockFace.UP).getType() != Material.POLISHED_ANDESITE) {
 			return;
 		}
 		// and by checking it is on the outer shell (get the direction at the same time)
 		BlockFace direction = this.getObjectDirectionOnOuterShell(block);
 		if (direction == BlockFace.SELF) {
-			//no direction found, the block is not on outer shell, hence it's not a door
+			// No direction found, the block is not on outer shell, hence it's not a door
 			return;
 		}
 
-		// get the biome
+		// Get the biome
 		Biome biome = getBiomeFromGlassOrBanner(block);
 		if (biome == Biome.NONE) {
 			return;
 		}
 
-		// get the relative position
+		// Get the relative position
 		Vector relPos = block.getLocation().clone().subtract(this.mLowLoc).toVector();
 
-		// create a door and add it to the doorList of the room
+		// Create a door and add it to the doorList of the room
 		Door d = new Door();
 		d.setDirection(direction);
 		d.setBiome(biome);
@@ -255,7 +255,7 @@ public class StructureParser {
 	}
 
 	private void parseAndSetBaseCoords() {
-		// calculate room size
+		// Calculate room size
 		this.mRoom.setSize(new Vector(
 			this.mHighLoc.getBlockX() - this.mLowLoc.getBlockX(),
 			this.mHighLoc.getBlockY() - this.mLowLoc.getBlockY(),

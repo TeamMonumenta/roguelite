@@ -113,7 +113,7 @@ public class DungeonReader {
 	public void output() {
 		String str = this.getOutputString();
 
-		// normal file
+		// Normal file
 		String fileName = LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd-HH:mm:ss"));
 		String filePath = this.mPlugin.getDataFolder().getPath() + "/stats/" + fileName + ".txt";
 		File f = new File(filePath);
@@ -126,7 +126,7 @@ public class DungeonReader {
 			Main.getInstance().getLogger().log(Level.WARNING, "Failed to save normal dungeon stats file", e);
 		}
 
-		// latest file
+		// Latest file
 		filePath = this.mPlugin.getDataFolder().getPath() + "/stats/latest.txt";
 		f = new File(filePath);
 		try (FileWriter file = new FileWriter(f, StandardCharsets.UTF_8)) {

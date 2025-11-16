@@ -15,17 +15,17 @@ import org.bukkit.util.Vector;
 
 public class LootChest extends RoomObject {
 
-	// basic constructor with default values
+	// Basic constructor with default values
 	public LootChest() {
 		super();
 	}
 
-	// basic constructor with given RoomObject values
+	// Basic constructor with given RoomObject values
 	public LootChest(BlockFace direction, Biome biome, Vector relPos) {
 		super(direction, biome, relPos);
 	}
 
-	// copy constructor
+	// Copy constructor
 	public LootChest(LootChest old) {
 		super(old);
 	}

@@ -24,12 +24,12 @@ public class Hitbox {
 	}
 
 	public boolean collidesWith(Hitbox other) {
-		//test collision between the two hitboxes
+		// Test collision between the two hitboxes
 		boolean collision = (this.mPos1.getBlockX() + 1 <= other.mPos2.getBlockX() && this.mPos2.getBlockX() - 1 >= other.mPos1.getBlockX()) &&
 			(this.mPos1.getBlockY() + 1 <= other.mPos2.getBlockY() && this.mPos2.getBlockY() - 1 >= other.mPos1.getBlockY()) &&
 			(this.mPos1.getBlockZ() + 1 <= other.mPos2.getBlockZ() && this.mPos2.getBlockZ() - 1 >= other.mPos1.getBlockZ());
 		if (!collision) {
-			//test collision with this hitbox and the world limits
+			// Test collision with this hitbox and the world limits
 			collision = this.mPos1.getBlockY() < 0 || this.mPos2.getBlockY() > 255;
 		}
 		return collision;

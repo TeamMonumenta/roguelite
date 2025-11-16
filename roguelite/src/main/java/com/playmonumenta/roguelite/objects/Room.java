@@ -22,7 +22,7 @@ public class Room {
 	List<LootChest> mLootChestList;
 	List<Door> mDoorList;
 
-	// copy constructor
+	// Copy constructor
 	public Room(Room old) {
 		this();
 		this.mPath = old.mPath;
@@ -45,7 +45,7 @@ public class Room {
 		}
 	}
 
-	//basic constructor
+	// Basic constructor
 	public Room() {
 		this.mPath = "undefined";
 		this.mType = RoomType.NONE;
@@ -58,7 +58,7 @@ public class Room {
 		this.mDoorList = new ArrayList<>();
 	}
 
-	//getters
+	// Getters
 
 	public String getPath() {
 		return mPath;
@@ -100,7 +100,7 @@ public class Room {
 		return StructuresAPI.loadAndPasteStructure(this.mPath, this.mLocation, true, false);
 	}
 
-	// setters
+	// Setters
 
 	public void setPath(String path) {
 		this.mPath = path;
@@ -138,7 +138,7 @@ public class Room {
 		this.mLootChestList = lootChestList;
 	}
 
-	// methods
+	// Methods
 
 	public JsonObject toJsonObject() {
 		JsonObject room = new JsonObject();
