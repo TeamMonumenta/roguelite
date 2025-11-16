@@ -107,6 +107,8 @@ public class Dungeon {
 		this.mHitboxCollection.add(new Hitbox(cl.clone().add(128, -89, -132), cl.clone().add(132, 166, 123))); // East instance limit
 		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-127, -89, 123), cl.clone().add(128, 166, 127))); // South instance limit
 		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -132), cl.clone().add(-127, 166, 123))); // West instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, -89, -136), cl.clone().add(132, -88, 127))); // Lower instance limit
+		this.mHitboxCollection.add(new Hitbox(cl.clone().add(-131, 162, -136), cl.clone().add(132, 163, 127))); // Upper instance limit
 
 		this.mStatus = DungeonStatus.INITIALIZED;
 		return this;
