@@ -91,7 +91,7 @@ public class Dungeon {
 
 		// Get a copy of the room pool
 		for (Room r : this.mMasterRoomPool) {
-			if (r.getWeight() != 0) {
+			if (r.getWeight() > 0) {
 				mUnusedRoomPool.add(new Room(r));
 			}
 		}
