@@ -16,18 +16,17 @@ import org.jetbrains.annotations.Nullable;
 
 public class DungeonBuilder {
 	Plugin mPlugin;
-	boolean mDirectLog;
+	long mRoomsModifyTime;
 	Location mCenterLoc;
-	public final List<DungeonBuildStep> mBuildStack = new ArrayList<>();
-	public final List<Hitbox> mDungeonWalls;
+	protected final List<DungeonBuildStep> mBuildStack = new ArrayList<>();
+	private final List<Hitbox> mDungeonWalls;
 	private final List<Objective> mSelectedObjectives = new ArrayList<>();
 	private final List<Objective> mObjectivePotentialSpawnPoints = new ArrayList<>();
 	private final List<LootChest> mSelectedLootChests = new ArrayList<>();
 	private final List<LootChest> mLootChestPotentialSpawnPoints = new ArrayList<>();
 
-	public DungeonBuilder(Plugin plugin, boolean directLog, Location cl, List<Room> roomPoolMaster) {
+	public DungeonBuilder(Plugin plugin, Location cl, List<Room> roomPoolMaster) {
 		mPlugin = plugin;
-		mDirectLog = directLog;
 		mCenterLoc = cl;
 
 		mDungeonWalls = List.of(
@@ -40,6 +39,11 @@ public class DungeonBuilder {
 
 		List<Door> remainingDoors = new ArrayList<>();
 		remainingDoors.add(new Door(cl.clone().add(0, 4, 3), Biome.getRandom(), BlockFace.SOUTH));
+
+		mRoomsModifyTime = roomPoolMaster.stream()
+			.map(Room::getModifyTime)
+			.max(Long::compareTo)
+			.orElse(0L);
 
 		Set<Room> weightedRooms = new HashSet<>(roomPoolMaster);
 		weightedRooms.removeIf(r -> r.getWeight() <= 0.0);
@@ -55,7 +59,7 @@ public class DungeonBuilder {
 				// Valid instance generated; select chests while still running async, will apply later
 				selectObjectivesAndChests();
 				return new DungeonLayout(
-					mDirectLog,
+					mRoomsModifyTime,
 					mCenterLoc,
 					selectedRooms(),
 					mSelectedObjectives,

@@ -12,6 +12,7 @@ import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import net.kyori.adventure.text.Component;
@@ -22,15 +23,18 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class RL2Command {
-
+	private static @Nullable RL2Command INSTANCE = null;
 	private List<Room> mRooms;
+	private long mRoomsModifyTime = 0L;
 	private final Plugin mPlugin;
 
-	RL2Command(Plugin p) {
+	private RL2Command(Plugin p) {
 		this.mPlugin = p;
 		this.mRooms = FileParser.loadRooms(p, null);
+		updateRoomsModifyTime();
 
 		CommandAPICommand helpCmd = new CommandAPICommand("help")
 			.executes((sender, args) -> {
@@ -66,6 +70,7 @@ public class RL2Command {
 			.executes((sender, args) -> {
 				accessCheck(sender);
 				this.mRooms = FileParser.loadRooms(this.mPlugin, sender);
+				updateRoomsModifyTime();
 				sender.sendMessage(this.mRooms.size() + " Files reloaded");
 			});
 
@@ -83,7 +88,7 @@ public class RL2Command {
 				if (runCount > 10000 && !force) {
 					throw CommandAPI.failWithString(String.format(
 						"Warning: big number chosen. the command is expected to run for approximately %d seconds.\n" +
-							"enter 'confirm' as the third argument to use that amount.", (int)(runCount * 0.0005)
+						"enter 'confirm' as the third argument to use that amount.", (int)(runCount * 0.0005)
 					));
 				}
 
@@ -103,6 +108,33 @@ public class RL2Command {
 			.withSubcommand(reloadCommand)
 			.withSubcommand(statsCommand)
 			.register();
+	}
+
+	public static RL2Command getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new RL2Command(Main.getInstance());
+		}
+		return INSTANCE;
+	}
+
+	public void onDisable() {
+		INSTANCE = null;
+	}
+
+	private void updateRoomsModifyTime() {
+		mRoomsModifyTime = mRooms.stream()
+			.map(Room::getModifyTime)
+			.max(Long::compareTo)
+			.orElse(0L);
+		LayoutManager.getInstance().restartGeneration(true);
+	}
+
+	public static List<Room> getRooms() {
+		return new ArrayList<>(getInstance().mRooms);
+	}
+
+	public static long roomsModifyTime() {
+		return getInstance().mRoomsModifyTime;
 	}
 
 	private void accessCheck(CommandSender sender) throws WrapperCommandSyntaxException {

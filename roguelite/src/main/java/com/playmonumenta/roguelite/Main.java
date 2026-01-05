@@ -1,5 +1,6 @@
 package com.playmonumenta.roguelite;
 
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,16 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		INSTANCE = this;
 
-		new RL2Command(this);
+		PluginManager manager = getServer().getPluginManager();
+		manager.registerEvents(LayoutManager.getInstance(), this);
+
+		RL2Command.getInstance();
+	}
+
+	@Override
+	public void onDisable() {
+		LayoutManager.getInstance().onDisable();
+		RL2Command.getInstance().onDisable();
 	}
 
 	public static Main getInstance() {

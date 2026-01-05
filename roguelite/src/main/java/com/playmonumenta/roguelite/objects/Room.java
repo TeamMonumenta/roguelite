@@ -16,6 +16,7 @@ import org.bukkit.util.Vector;
 
 public class Room {
 	private String mPath;
+	private long mModifyTime;
 	private RoomType mType;
 	private Vector mSize;
 	private Location mLocation;
@@ -32,6 +33,7 @@ public class Room {
 	public Room(Room old) {
 		this();
 		this.mPath = old.mPath;
+		this.mModifyTime = old.mModifyTime;
 		this.mType = old.mType;
 		this.mSize = old.mSize;
 		this.mLocation = old.mLocation.clone();
@@ -56,6 +58,7 @@ public class Room {
 	// Basic constructor
 	public Room() {
 		this.mPath = "undefined";
+		this.mModifyTime = 0L;
 		this.mType = RoomType.NONE;
 		this.mSize = new Vector(0, 0, 0);
 		this.mLocation = new Location(null, 0, 0, 0);
@@ -110,6 +113,14 @@ public class Room {
 		}
 
 		if (
+			roomObj.get("modifyTime") instanceof JsonPrimitive modifyTime && modifyTime.isNumber()
+		) {
+			mModifyTime = modifyTime.getAsLong();
+		} else {
+			mModifyTime = 0L;
+		}
+
+		if (
 			roomObj.get("location") instanceof JsonObject locationObject &&
 			locationObject.get("world") instanceof JsonPrimitive worldPrimitive && worldPrimitive.isString() &&
 			locationObject.get("x") instanceof JsonPrimitive xLocPrim && xLocPrim.isNumber() &&
@@ -134,12 +145,18 @@ public class Room {
 		} else {
 			mVisited = false;
 		}
+
+		mHitbox = new Hitbox(this);
 	}
 
 	// Getters
 
 	public String getPath() {
 		return mPath;
+	}
+
+	public long getModifyTime() {
+		return mModifyTime;
 	}
 
 	public RoomType getType() {
@@ -188,12 +205,20 @@ public class Room {
 		this.mPath = path;
 	}
 
+	public void setModifyTime(long modifyTime) {
+		this.mModifyTime = modifyTime;
+	}
+
 	public void setType(RoomType type) {
 		this.mType = type;
 	}
 
 	public void setSize(Vector size) {
 		this.mSize = size;
+	}
+
+	public void setWorld(World world) {
+		this.mLocation.setWorld(world);
 	}
 
 	public void setLocation(Location location) {
@@ -273,6 +298,7 @@ public class Room {
 		}
 
 		room.addProperty("path", this.mPath);
+		room.addProperty("modifyTime", this.mModifyTime);
 		room.add("location", location);
 		room.add("size", size);
 		room.addProperty("type", this.mType.name());

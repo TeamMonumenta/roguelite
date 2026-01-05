@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.playmonumenta.roguelite.enums.Biome;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
@@ -55,6 +56,10 @@ public class RoomObject {
 
 	public void setRelPos(Vector relPos) {
 		this.mRelPos = relPos;
+	}
+
+	public void setWorld(World world) {
+		this.mLocation.setWorld(world);
 	}
 
 	public void setLocation(Location location) {
