@@ -84,6 +84,7 @@ public final class DungeonBuildStep {
 				continue;
 			}
 			mRemainingSrcDoorsThisStep.add(d);
+			mRemainingDoors.add(d);
 		}
 
 		mRemainingDestRoomsThisStep = new ArrayList<>();
@@ -109,7 +110,7 @@ public final class DungeonBuildStep {
 		// If we're re-entering this, we had to backtrack - unmark the selected door/room
 		mDstDoor = null;
 
-		if (mRemainingDestRoomsThisStep.isEmpty()) {
+		if (mValidDestDoorsThisStep.isEmpty()) {
 			shuffleDstRooms();
 		}
 		if (mSrcDoor == null) {
@@ -119,7 +120,12 @@ public final class DungeonBuildStep {
 		Location pos = mSrcDoor.getLocation();
 
 		Room dstRoom = mRemainingDestRoomsThisStep.getFirst();
-		Door dstDoor = mValidDestDoorsThisStep.getOrDefault(dstRoom, new ArrayList<>()).removeFirst();
+		List<Door> validDoorsForDstRoom = mValidDestDoorsThisStep.getOrDefault(dstRoom, new ArrayList<>());
+		Door dstDoor = validDoorsForDstRoom.removeFirst();
+		if (validDoorsForDstRoom.isEmpty()) {
+			mRemainingDestRoomsThisStep.removeFirst();
+			mValidDestDoorsThisStep.remove(dstRoom);
+		}
 		dstRoom.setLocation(pos.clone().subtract(dstDoor.getRelPos()));
 		Hitbox dstHitbox = dstRoom.getHitbox();
 

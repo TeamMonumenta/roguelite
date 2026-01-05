@@ -55,8 +55,11 @@ public class Utils {
 		}
 	}
 
-	public static <T> T removeRandomElement(List<T> list) {
+	public static <T> T removeRandomElement(List<T> list) throws IndexOutOfBoundsException {
 		Random random = new Random();
+		if (list.isEmpty()) {
+			throw new IndexOutOfBoundsException("That list is empty!");
+		}
 		return list.remove(random.nextInt(list.size()));
 	}
 
