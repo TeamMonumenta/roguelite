@@ -1,5 +1,6 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonElement;
 import com.playmonumenta.roguelite.enums.Biome;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -29,6 +30,12 @@ public class Door extends RoomObject {
 		this.setDirection(old.getDirection());
 		this.setLocation(old.getLocation().clone());
 		this.mParentRoom = old.mParentRoom;
+	}
+
+	// Json constructor
+	public Door(JsonElement data, Room parentRoom) throws Exception {
+		fromJsonElement(data);
+		mParentRoom = parentRoom;
 	}
 
 	// Getters

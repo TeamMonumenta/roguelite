@@ -1,12 +1,15 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.playmonumenta.roguelite.enums.Biome;
-import java.util.Locale;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.util.Vector;
+
+import java.util.Locale;
 
 public class Objective extends RoomObject {
 
@@ -23,6 +26,11 @@ public class Objective extends RoomObject {
 	// Copy constructor
 	public Objective(Objective old) {
 		super(old);
+	}
+
+	// Json constructor
+	public Objective(JsonElement data) throws Exception {
+		fromJsonElement(data);
 	}
 
 	public void spawnObjective() {

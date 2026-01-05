@@ -1,9 +1,9 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.playmonumenta.roguelite.Main;
 import com.playmonumenta.roguelite.enums.Biome;
-import java.util.Locale;
-import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,6 +13,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.loot.LootTable;
 import org.bukkit.util.Vector;
+
+import java.util.Locale;
+import java.util.Objects;
 
 public class LootChest extends RoomObject {
 
@@ -29,6 +32,11 @@ public class LootChest extends RoomObject {
 	// Copy constructor
 	public LootChest(LootChest old) {
 		super(old);
+	}
+
+	// Json constructor
+	public LootChest(JsonElement data) throws Exception {
+		fromJsonElement(data);
 	}
 
 	public void spawnChest() {

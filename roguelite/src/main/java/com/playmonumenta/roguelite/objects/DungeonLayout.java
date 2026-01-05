@@ -1,5 +1,9 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.playmonumenta.roguelite.Main;
 import com.playmonumenta.roguelite.Utils;
 import com.playmonumenta.roguelite.enums.BuildStatus;
@@ -29,16 +33,16 @@ public class DungeonLayout {
 	private final Location mCenterLoc;
 	private final Vector mMinCorner;
 	// true if visited
-	private final Map<Room, Boolean> mRoomsVisited = new HashMap<>();
+	private final List<Room> mRoomsVisited = new ArrayList<>();
 	// Minimize how many rooms need to be checked for a given location
 	private final Map<Long, Set<Room>> mRoomBins = new HashMap<>();
 
 	// Build finalization info
+	private final List<Objective> mObjectives = new ArrayList<>();
+	private final List<Objective> mChestsReplacingObjectives = new ArrayList<>();
+	private final List<LootChest> mSelectedChests = new ArrayList<>();
+	private final List<LootChest> mUnselectedChests = new ArrayList<>();
 	private BuildStatus mBuildStatus;
-	private final List<Objective> mObjectives;
-	private final List<Objective> mChestsReplacingObjectives;
-	private final List<LootChest> mSelectedChests;
-	private final List<LootChest> mUnselectedChests;
 
 	public DungeonLayout(
 		boolean directLog,
@@ -54,7 +58,7 @@ public class DungeonLayout {
 		mMinCorner = centerLoc.clone().add(-131, -89, -136).toVector();
 
 		for (Room room : rooms) {
-			mRoomsVisited.put(room, false);
+			mRoomsVisited.add(room);
 
 			for (long subChunkKey : room.getHitbox().subChunkVectors(mMinCorner)) {
 				mRoomBins.computeIfAbsent(subChunkKey, k -> new HashSet<>()).add(room);
@@ -84,12 +88,117 @@ public class DungeonLayout {
 			}
 		}
 
-		mObjectives = new ArrayList<>(objectives);
-		mChestsReplacingObjectives = new ArrayList<>(chestsReplacingObjectives);
-		mSelectedChests = new ArrayList<>(selectedChests);
-		mUnselectedChests = new ArrayList<>(unselectedChests);
+		mObjectives.addAll(objectives);
+		mChestsReplacingObjectives.addAll(chestsReplacingObjectives);
+		mSelectedChests.addAll(selectedChests);
+		mUnselectedChests.addAll(unselectedChests);
 
 		mBuildStatus = BuildStatus.UNSTARTED;
+	}
+
+	public DungeonLayout(JsonObject data) throws Exception {
+		if (
+			data.get("directLog") instanceof JsonPrimitive directLog && directLog.isBoolean() &&
+			data.get("centerLoc") instanceof JsonObject centerLoc &&
+			centerLoc.get("world") instanceof JsonPrimitive worldName && worldName.isString() &&
+			centerLoc.get("x") instanceof JsonPrimitive centerX && centerX.isNumber() &&
+			centerLoc.get("y") instanceof JsonPrimitive centerY && centerY.isNumber() &&
+			centerLoc.get("z") instanceof JsonPrimitive centerZ && centerZ.isNumber() &&
+			data.get("minCorner") instanceof JsonObject minCorner &&
+			minCorner.get("x") instanceof JsonPrimitive minX && minX.isNumber() &&
+			minCorner.get("y") instanceof JsonPrimitive minY && minY.isNumber() &&
+			minCorner.get("z") instanceof JsonPrimitive minZ && minZ.isNumber() &&
+			data.get("roomsVisited") instanceof JsonArray roomsVisited &&
+			data.get("objectives") instanceof JsonArray objectives &&
+			data.get("chestsReplacingObjectives") instanceof JsonArray chestsReplacingObjectives &&
+			data.get("selectedChests") instanceof JsonArray selectedChests &&
+			data.get("unselectedChests") instanceof JsonArray unselectedChests &&
+			data.get("buildStatus") instanceof JsonPrimitive buildStatus && buildStatus.isString()
+		) {
+			mDirectLog = directLog.getAsBoolean();
+
+			World world = Bukkit.getWorld(worldName.getAsString());
+			mCenterLoc = new Location(world, centerX.getAsInt(), centerY.getAsInt(), centerZ.getAsInt());
+
+			mMinCorner = new Vector(minX.getAsInt(), minY.getAsInt(), minZ.getAsInt());
+
+			for (JsonElement r : roomsVisited) {
+				mRoomsVisited.add(new Room(r));
+			}
+
+			for (JsonElement o : objectives) {
+				mObjectives.add(new Objective(o));
+			}
+
+			for (JsonElement o : chestsReplacingObjectives) {
+				mChestsReplacingObjectives.add(new Objective(o));
+			}
+
+			for (JsonElement c : selectedChests) {
+				mSelectedChests.add(new LootChest(c));
+			}
+
+			for (JsonElement c : unselectedChests) {
+				mUnselectedChests.add(new LootChest(c));
+			}
+
+			mBuildStatus = BuildStatus.valueOf(buildStatus.getAsString());
+		} else {
+			throw new Exception("Not all required fields for a Layout were found");
+		}
+	}
+
+	public JsonObject toJsonObject() {
+		JsonObject layout = new JsonObject();
+
+		layout.addProperty("directLog", mDirectLog);
+
+		JsonObject centerLocation = new JsonObject();
+		centerLocation.addProperty("world", mCenterLoc.getWorld().getName());
+		centerLocation.addProperty("x", mCenterLoc.getBlockX());
+		centerLocation.addProperty("y", mCenterLoc.getBlockY());
+		centerLocation.addProperty("z", mCenterLoc.getBlockZ());
+		layout.add("centerLoc", centerLocation);
+
+		JsonObject minCorner = new JsonObject();
+		minCorner.addProperty("x", mMinCorner.getBlockX());
+		minCorner.addProperty("y", mMinCorner.getBlockY());
+		minCorner.addProperty("z", mMinCorner.getBlockZ());
+		layout.add("minCorner", minCorner);
+
+		JsonArray roomsVisited = new JsonArray();
+		for (Room room : mRoomsVisited) {
+			roomsVisited.add(room.toJsonObject());
+		}
+		layout.add("roomsVisited", roomsVisited);
+
+		JsonArray objectives = new JsonArray();
+		for (Objective o : mObjectives) {
+			objectives.add(o.toJsonObject());
+		}
+		layout.add("objectives", objectives);
+
+		JsonArray chestsReplacingObjectives = new JsonArray();
+		for (Objective o : mChestsReplacingObjectives) {
+			chestsReplacingObjectives.add(o.toJsonObject());
+		}
+		layout.add("chestsReplacingObjectives", chestsReplacingObjectives);
+
+		JsonArray selectedChests = new JsonArray();
+		for (LootChest c : mSelectedChests) {
+			selectedChests.add(c.toJsonObject());
+		}
+		layout.add("selectedChests", selectedChests);
+
+		JsonArray unselectedChests = new JsonArray();
+		for (LootChest c : mUnselectedChests) {
+			unselectedChests.add(c.toJsonObject());
+		}
+		layout.add("unselectedChests", unselectedChests);
+
+		layout.addProperty("buildStatus", mBuildStatus.toString());
+
+		return layout;
 	}
 
 	/**
@@ -111,7 +220,7 @@ public class DungeonLayout {
 
 		for (Room room : possibleRooms) {
 			if (room.getHitbox().contains(position)) {
-				mRoomsVisited.put(room, true);
+				room.setVisited(true);
 			}
 		}
 	}
@@ -121,9 +230,8 @@ public class DungeonLayout {
 	 * @return A list of rooms a player has visited
 	 */
 	public List<Room> visitedRooms() {
-		return mRoomsVisited.entrySet().stream()
-			.filter(Map.Entry::getValue)
-			.map(Map.Entry::getKey)
+		return mRoomsVisited.stream()
+			.filter(Room::getVisited)
 			.toList();
 	}
 
@@ -142,7 +250,7 @@ public class DungeonLayout {
 
 		Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
 			Map<RoomType, List<Room>> roomMap = new HashMap<>();
-			for (Room room : mRoomsVisited.keySet()) {
+			for (Room room : mRoomsVisited) {
 				roomMap.computeIfAbsent(room.getType(), k -> new ArrayList<>()).add(room);
 			}
 

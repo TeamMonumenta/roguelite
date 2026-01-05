@@ -1,13 +1,17 @@
 package com.playmonumenta.roguelite.objects;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.playmonumenta.roguelite.enums.RoomType;
 import com.playmonumenta.structures.StructuresAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.util.Vector;
 
 public class Room {
@@ -21,6 +25,8 @@ public class Room {
 	List<Objective> mObjectiveList;
 	List<LootChest> mLootChestList;
 	List<Door> mDoorList;
+
+	private boolean mVisited;
 
 	// Copy constructor
 	public Room(Room old) {
@@ -43,6 +49,8 @@ public class Room {
 			n.setParentRoom(this);
 			this.mDoorList.add(n);
 		}
+
+		this.mVisited = false;
 	}
 
 	// Basic constructor
@@ -56,6 +64,76 @@ public class Room {
 		this.mObjectiveList = new ArrayList<>();
 		this.mLootChestList = new ArrayList<>();
 		this.mDoorList = new ArrayList<>();
+		this.mVisited = false;
+	}
+
+	// Json constructor
+	public Room(JsonElement data) throws Exception {
+		if (
+			data instanceof JsonObject roomObj &&
+			roomObj.get("path") instanceof JsonPrimitive pathPrimitive && pathPrimitive.isString() &&
+			roomObj.get("size") instanceof JsonObject sizeObject &&
+			sizeObject.get("x") instanceof JsonPrimitive xSizePrim && xSizePrim.isNumber() &&
+			sizeObject.get("y") instanceof JsonPrimitive ySizePrim && ySizePrim.isNumber() &&
+			sizeObject.get("z") instanceof JsonPrimitive zSizePrim && zSizePrim.isNumber() &&
+			roomObj.get("type") instanceof JsonPrimitive typePrimitive && typePrimitive.isString() &&
+			roomObj.get("weight") instanceof JsonPrimitive weightPrimitive && weightPrimitive.isNumber() &&
+			roomObj.get("doors") instanceof JsonArray doorsArray &&
+			roomObj.get("objectives") instanceof JsonArray objectivesArray &&
+			roomObj.get("chests") instanceof JsonArray chestsArray
+		) {
+			mPath = pathPrimitive.getAsString();
+			mSize = new Vector(
+				xSizePrim.getAsInt(),
+				ySizePrim.getAsInt(),
+				zSizePrim.getAsInt()
+			);
+			mType = RoomType.valueOf(typePrimitive.getAsString());
+			mWeight = weightPrimitive.getAsInt();
+
+			mDoorList = new ArrayList<>();
+			for (JsonElement doorData : doorsArray) {
+				mDoorList.add(new Door(doorData, this));
+			}
+
+			mObjectiveList = new ArrayList<>();
+			for (JsonElement objectiveData : objectivesArray) {
+				mObjectiveList.add(new Objective(objectiveData));
+			}
+
+			mLootChestList = new ArrayList<>();
+			for (JsonElement chestData : chestsArray) {
+				mLootChestList.add(new LootChest(chestData));
+			}
+		} else {
+			throw new Exception("Not all required fields were present for a given Room");
+		}
+
+		if (
+			roomObj.get("location") instanceof JsonObject locationObject &&
+			locationObject.get("world") instanceof JsonPrimitive worldPrimitive && worldPrimitive.isString() &&
+			locationObject.get("x") instanceof JsonPrimitive xLocPrim && xLocPrim.isNumber() &&
+			locationObject.get("y") instanceof JsonPrimitive yLocPrim && yLocPrim.isNumber() &&
+			locationObject.get("z") instanceof JsonPrimitive zLocPrim && zLocPrim.isNumber()
+		) {
+			World world = Bukkit.getWorld(worldPrimitive.getAsString());
+			mLocation = new Location(
+				world,
+				xLocPrim.getAsInt(),
+				yLocPrim.getAsInt(),
+				zLocPrim.getAsInt()
+			);
+
+			setContentLocations();
+		} else {
+			mLocation = new Location(null, 0, 0, 0);
+		}
+
+		if (roomObj.get("visited") instanceof JsonPrimitive visited && visited.isBoolean()) {
+			mVisited = visited.getAsBoolean();
+		} else {
+			mVisited = false;
+		}
 	}
 
 	// Getters
@@ -94,6 +172,10 @@ public class Room {
 
 	public List<LootChest> getLootChestList() {
 		return this.mLootChestList;
+	}
+
+	public boolean getVisited() {
+		return mVisited;
 	}
 
 	public CompletableFuture<Void> loadAndPasteAsync() {
@@ -138,6 +220,10 @@ public class Room {
 		this.mLootChestList = lootChestList;
 	}
 
+	public void setVisited(boolean visited) {
+		mVisited = visited;
+	}
+
 	// Methods
 
 	public void setContentLocations() {
@@ -156,10 +242,20 @@ public class Room {
 
 	public JsonObject toJsonObject() {
 		JsonObject room = new JsonObject();
+		JsonObject location = null;
 		JsonObject size = new JsonObject();
 		JsonArray doors = new JsonArray();
 		JsonArray objectives = new JsonArray();
 		JsonArray chests = new JsonArray();
+
+		Location roomLocation = this.getLocation();
+		if (!roomLocation.equals(new Location(null, 0, 0, 0))) {
+			location = new JsonObject();
+			location.addProperty("world", roomLocation.getWorld().getName());
+			location.addProperty("x", roomLocation.getBlockX());
+			location.addProperty("y", roomLocation.getBlockY());
+			location.addProperty("z", roomLocation.getBlockZ());
+		}
 
 		Vector roomSize = this.getSize();
 		size.addProperty("x", roomSize.getBlockX());
@@ -177,12 +273,16 @@ public class Room {
 		}
 
 		room.addProperty("path", this.mPath);
+		room.add("location", location);
 		room.add("size", size);
 		room.addProperty("type", this.mType.name());
 		room.addProperty("weight", this.mWeight);
 		room.add("doors", doors);
 		room.add("objectives", objectives);
 		room.add("chests", chests);
+		if (this.mVisited) {
+			room.addProperty("visited", true);
+		}
 		return room;
 	}
 }

@@ -1,6 +1,8 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.playmonumenta.roguelite.enums.Biome;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -79,6 +81,29 @@ public class RoomObject {
 
 	// Methods
 
+	public void fromJsonElement(JsonElement data) throws Exception {
+		if (
+			data instanceof JsonObject obj &&
+			obj.get("x") instanceof JsonPrimitive xPrimitive && xPrimitive.isNumber() &&
+			obj.get("y") instanceof JsonPrimitive yPrimitive && yPrimitive.isNumber() &&
+			obj.get("z") instanceof JsonPrimitive zPrimitive && zPrimitive.isNumber() &&
+			obj.get("biome") instanceof JsonPrimitive biomePrimitive && biomePrimitive.isString() &&
+			obj.get("dir") instanceof JsonPrimitive dirPrimitive && dirPrimitive.isString()
+		) {
+			int x = xPrimitive.getAsInt();
+			int y = yPrimitive.getAsInt();
+			int z = zPrimitive.getAsInt();
+			String biomeStr = biomePrimitive.getAsString();
+			String dirStr = dirPrimitive.getAsString();
+
+			mRelPos = new Vector(x, y, z);
+			mBiome = Biome.valueOf(biomeStr);
+			mDirection = BlockFace.valueOf(dirStr);
+		} else {
+			throw new Exception("Some required fields were missing from a room object");
+		}
+	}
+
 	public JsonObject toJsonObject() {
 		JsonObject out = new JsonObject();
 		Vector rp = this.getRelPos();
@@ -89,5 +114,4 @@ public class RoomObject {
 		out.addProperty("dir", this.getDirection().toString());
 		return out;
 	}
-
 }
