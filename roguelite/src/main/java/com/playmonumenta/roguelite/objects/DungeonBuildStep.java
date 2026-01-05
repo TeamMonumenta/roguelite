@@ -38,6 +38,12 @@ public final class DungeonBuildStep {
 	@Nullable Door mSrcDoor = null;
 	@Nullable Door mDstDoor = null;
 
+	/**
+	 * Create initial step
+	 * @param dungeonBuilder The builder generating this step
+	 * @param remainingDoors The doors that do not have a room or dead end attached yet
+	 * @param roomPoolMaster The collection of all valid rooms
+	 */
 	public DungeonBuildStep(DungeonBuilder dungeonBuilder, Collection<Door> remainingDoors, Collection<Room> roomPoolMaster) {
 		mDungeonBuilder = dungeonBuilder;
 
@@ -49,16 +55,30 @@ public final class DungeonBuildStep {
 		shuffleSrcDoors();
 	}
 
-	public DungeonBuildStep(DungeonBuildStep other) {
+	/**
+	 * Creates a new step off of an existing step
+	 * @param other The previous step in the build stack
+	 * @throws NoSuchElementException Occurs if the current step is invalid, requiring backtracking
+	 */
+	public DungeonBuildStep(DungeonBuildStep other) throws NoSuchElementException {
 		mDungeonBuilder = other.mDungeonBuilder;
 		mRemainingRooms = new HashSet<>(other.mRemainingRooms);
 		mRemainingDoors = new HashSet<>(other.mRemainingDoors);
+
+		Room previousRoom = other.selectedRoom();
+		if (previousRoom == null) {
+			throw new NoSuchElementException("Previous room somehow not selected?");
+		}
+		if (!RoomType.DEADEND.equals(previousRoom.getType())) {
+			mRemainingRooms.remove(previousRoom);
+		}
 
 		mCurrentRoomNumber = other.mCurrentRoomNumber + 1;
 		mRoomTypeCounts = new HashMap<>(other.mRoomTypeCounts);
 
 		mRemainingSrcDoorsThisStep = new ArrayList<>(other.mRemainingSrcDoorsThisStep);
 		mRemainingSrcDoorsThisStep.remove(other.mSrcDoor);
+		mRemainingDoors.remove(other.mSrcDoor);
 		for (Door d : Objects.requireNonNull(other.selectedRoom()).getDoorList()) {
 			if (d.equals(other.mDstDoor)) {
 				continue;
@@ -121,6 +141,10 @@ public final class DungeonBuildStep {
 		return false;
 	}
 
+	/**
+	 * Gets the currently selected room, if one has been selected
+	 * @return The selected room, or null if none is selected at this time
+	 */
 	public @Nullable Room selectedRoom() {
 		if (mDstDoor == null) {
 			return null;
@@ -128,6 +152,9 @@ public final class DungeonBuildStep {
 		return mDstDoor.getParentRoom();
 	}
 
+	/**
+	 * Randomizes the order in which source (starting) doors are selected
+	 */
 	public void shuffleSrcDoors() {
 		mRemainingSrcDoorsThisStep = new ArrayList<>(mRemainingDoors);
 		if (mCurrentRoomNumber <= Config.ROOMS_TO_SPAWN) {
@@ -135,6 +162,11 @@ public final class DungeonBuildStep {
 		}
 	}
 
+	/**
+	 * Creates a randomized list of destination rooms for the currently selected door
+	 * @throws NoSuchElementException if there are no possible ways to make a valid instance from this step;
+	 * if this occurs, backtracking is required.
+	 */
 	public void shuffleDstRooms() throws NoSuchElementException {
 		EnumSet<RoomType> validRoomTypes = EnumSet.noneOf(RoomType.class);
 		if (mCurrentRoomNumber > Config.ROOMS_TO_SPAWN) {

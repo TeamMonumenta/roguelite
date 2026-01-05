@@ -92,7 +92,11 @@ public class DungeonLayout {
 		mBuildStatus = BuildStatus.UNSTARTED;
 	}
 
-	// Assumes this is the correct world for the layout
+	/**
+	 * Checks if a player is in a room in the current layout;
+	 * assumes the player is in the world for this layout
+	 * @param player A player within the dungeon layout
+	 */
 	public void markVisited(Player player) {
 		if (!player.getGameMode().equals(GameMode.SURVIVAL)) {
 			return;
@@ -112,6 +116,10 @@ public class DungeonLayout {
 		}
 	}
 
+	/**
+	 * Gets the rooms that have been visited and can be shown to the player
+	 * @return A list of rooms a player has visited
+	 */
 	public List<Room> visitedRooms() {
 		return mRoomsVisited.entrySet().stream()
 			.filter(Map.Entry::getValue)
@@ -119,6 +127,10 @@ public class DungeonLayout {
 			.toList();
 	}
 
+	/**
+	 * Attempts to place the generated layout
+	 * @return a future to indicate when the instance has finished being placed
+	 */
 	public CompletableFuture<Void> spawn() {
 		CompletableFuture<Void> future = new CompletableFuture<>();
 
@@ -163,6 +175,11 @@ public class DungeonLayout {
 		return future;
 	}
 
+	/**
+	 * Starts to spawn rooms from a list
+	 * @param rooms A list of rooms to be spawned, assumed to all be the same type
+	 * @return A list of futures for each room's spawn attempt
+	 */
 	private List<CompletableFuture<Void>> beginSpawningRoomList(List<Room> rooms) {
 		if (rooms.isEmpty()) {
 			return List.of();
@@ -175,6 +192,9 @@ public class DungeonLayout {
 		return futures;
 	}
 
+	/**
+	 * Spawns the objectives (end crystals); must be run sync
+	 */
 	private void spawnObjectives() {
 		directLog("Spawning objectives");
 		for (Objective o : mObjectives) {
@@ -182,6 +202,9 @@ public class DungeonLayout {
 		}
 	}
 
+	/**
+	 * Spawns chests, and air/water at spaces that could, but did not, have chests
+	 */
 	private void spawnChests() {
 		directLog("Spawning chests");
 		for (Objective o : mChestsReplacingObjectives) {
@@ -195,6 +218,9 @@ public class DungeonLayout {
 		}
 	}
 
+	/**
+	 * Removes the barrier blocking the player from entering the instance
+	 */
 	private void openFirstPath() {
 		Location l = mCenterLoc.clone().add(0, 7, 2);
 		l.clone().add(0, 2, 0).getBlock().setType(Material.LIGHT_BLUE_STAINED_GLASS);
