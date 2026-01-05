@@ -1,8 +1,10 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.google.gson.JsonElement;
 import com.playmonumenta.roguelite.Main;
 import com.playmonumenta.roguelite.enums.Biome;
 import java.util.Locale;
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,7 +16,6 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.util.Vector;
 
 public class LootChest extends RoomObject {
-
 	// Basic constructor with default values
 	public LootChest() {
 		super();
@@ -28,6 +29,11 @@ public class LootChest extends RoomObject {
 	// Copy constructor
 	public LootChest(LootChest old) {
 		super(old);
+	}
+
+	// Json constructor
+	public LootChest(JsonElement data) throws Exception {
+		fromJsonElement(data);
 	}
 
 	public void spawnChest() {
@@ -57,7 +63,7 @@ public class LootChest extends RoomObject {
 		chestData.setFacing(facing);
 		chestData.setWaterlogged(waterlogged);
 		blockState.setBlockData(chestData);
-		LootTable loot = Bukkit.getLootTable(NamespacedKey.fromString(table));
+		LootTable loot = Bukkit.getLootTable(Objects.requireNonNull(NamespacedKey.fromString(table)));
 		if (loot == null) {
 			Main.getInstance().getLogger().severe("Could not find loot table: " + table);
 		}

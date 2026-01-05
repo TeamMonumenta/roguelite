@@ -1,8 +1,8 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.playmonumenta.roguelite.LayoutManager;
 import com.playmonumenta.roguelite.Main;
 import com.playmonumenta.roguelite.enums.Biome;
-import com.playmonumenta.roguelite.enums.DungeonStatus;
 import com.playmonumenta.roguelite.enums.RoomType;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,12 +14,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -38,21 +36,16 @@ public class DungeonReader {
 	// Item with no further items
 	private static final String ITEM_WITHOUT_CONTINUATION = "└── ";
 
-	private final List<Room> mRooms;
 	private final Plugin mPlugin;
 	private final CommandSender mSender;
 	private float mProgress;
-	private final Location mLoc;
 
 	private final Stats mStats;
 
-	public DungeonReader(List<Room> r, Plugin p, CommandSender s, Location l) {
+	public DungeonReader(Plugin p, CommandSender s) {
 		this.mPlugin = p;
-		this.mRooms = r;
 		this.mSender = s;
 		this.mProgress = 0;
-		this.mLoc = l.clone();
-		this.mLoc.setY(89);
 		this.mStats = new Stats();
 	}
 
@@ -66,9 +59,7 @@ public class DungeonReader {
 		this.mStats.addToTargetDungeonCount(amount);
 		for (int i = 0; i < amount; i++) {
 			this.mProgress = 100 * (float)i / amount;
-			Dungeon dungeon = new Dungeon(this.mRooms, this.mLoc, this.mPlugin, false);
-			dungeon.calculateWithRetries(1);
-			this.readDungeon(dungeon);
+			this.readDungeon();
 		}
 		progressMeterTask.cancel();
 		if (this.mSender instanceof Player) {
@@ -78,36 +69,31 @@ public class DungeonReader {
 		}
 	}
 
-	private void readDungeon(Dungeon dungeon) {
-		if (dungeon.mStatus == DungeonStatus.CALCULATED) {
-			this.mStats.addToSuccessfulDungeonCount(1);
-			this.readRooms(dungeon.mUsedRooms);
-			this.mStats.addToUnusedChestsTotal(dungeon.mLootChestPotentialSpawnPoints.size());
-			this.readSpawnedChests(dungeon);
-		} else {
+	private void readDungeon() {
+		LayoutManager layoutManager = LayoutManager.getInstance();
+		DungeonLayout layout;
+		try {
+			layout = layoutManager.getLayoutTest();
+		} catch (InterruptedException ex) {
 			this.mStats.addToUnsuccessfulDungeonCount(1);
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			if (dungeon.mCalculationException != null) {
-				dungeon.mCalculationException.printStackTrace(pw);
-			}
+			ex.printStackTrace(pw);
 			this.mStats.addToDungeonCalculationFailures(sw.toString(), 1);
+			return;
 		}
-	}
 
-	private void readRooms(List<Room> rooms) {
-		for (Room r : rooms) {
-			this.mStats.addToRoomDistribution(r, 1);
+		if (layout == null) {
+			this.mStats.addToUnsuccessfulDungeonCount(1);
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			Exception ex = new Exception("No dungeon was generated in time.");
+			ex.printStackTrace(pw);
+			this.mStats.addToDungeonCalculationFailures(sw.toString(), 1);
+			return;
 		}
-	}
 
-	private void readSpawnedChests(Dungeon dungeon) {
-		for (Objective o : dungeon.mObjectivePotentialSpawnPoints) {
-			this.mStats.addToSpawnedChests(o, 1);
-		}
-		for (LootChest c : dungeon.mSelectedLootChests) {
-			this.mStats.addToSpawnedChests(c, 1);
-		}
+		layout.updateStats(this.mStats);
 	}
 
 	public void output() {

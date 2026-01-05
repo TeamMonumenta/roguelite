@@ -15,8 +15,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -45,7 +47,7 @@ public class FileParser {
 						String fileName = file.getPath();
 						try (FileReader reader = new FileReader(fileName, StandardCharsets.UTF_8)) {
 							outLog.append(file.getName());
-							out.add(parseFile(gson.fromJson(reader, JsonObject.class)));
+							out.add(parseFile(file, gson.fromJson(reader, JsonObject.class)));
 							outLog.append(" | ");
 						} catch (IOException e) {
 							Main.getInstance().getLogger().log(Level.WARNING, "Failed to parse room file at " + fileName, e);
@@ -63,12 +65,20 @@ public class FileParser {
 		return out;
 	}
 
-	static Room parseFile(JsonElement root) {
+	static Room parseFile(File file, JsonElement root) {
 		Room out = new Room();
+
+		long modifyTime;
+		try {
+			modifyTime = Files.getLastModifiedTime(file.toPath()).to(TimeUnit.SECONDS);
+		} catch (Exception ex) {
+			modifyTime = 0;
+		}
 
 		JsonObject rootObj = root.getAsJsonObject();
 		out.setLocation(new Location(null, 0, 0, 0));
 		out.setPath(rootObj.get("path").getAsString());
+		out.setModifyTime(modifyTime);
 		out.setSize(parseVector(rootObj.get("size").getAsJsonObject()));
 		out.setWeight(rootObj.get("weight").getAsInt());
 		out.setType(RoomType.valueOf(rootObj.get("type").getAsString()));
