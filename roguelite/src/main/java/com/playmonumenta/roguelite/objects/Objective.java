@@ -10,7 +10,6 @@ import org.bukkit.entity.EnderCrystal;
 import org.bukkit.util.Vector;
 
 public class Objective extends RoomObject {
-
 	// Basic constructor with default values
 	public Objective() {
 		super();

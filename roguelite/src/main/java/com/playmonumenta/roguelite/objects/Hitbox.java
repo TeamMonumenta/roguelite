@@ -57,9 +57,4 @@ public class Hitbox {
 		}
 		return result;
 	}
-
-	public Hitbox incToPostPlacing() {
-		mBb.expand(2, 0, 2);
-		return this;
-	}
 }

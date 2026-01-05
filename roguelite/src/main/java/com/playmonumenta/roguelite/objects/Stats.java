@@ -57,7 +57,7 @@ public class Stats {
 
 	public void addToDungeonCalculationFailures(String failure, int amount) {
 		this.mDungeonCalculationFailures.put(failure, amount +
-			this.mDungeonCalculationFailures.getOrDefault(failure, 0));
+		                                              this.mDungeonCalculationFailures.getOrDefault(failure, 0));
 	}
 
 	public void addToUnusedChestsTotal(int amount) {
@@ -81,13 +81,13 @@ public class Stats {
 	public void addToSpawnedChests(Objective o, int amount) {
 		this.addToSpawnedChestsObjectiveTotal(amount);
 		this.mSpawnedChestsObjective.put(o.getBiome(), amount +
-			this.mSpawnedChestsObjective.getOrDefault(o.getBiome(), 0));
+		                                               this.mSpawnedChestsObjective.getOrDefault(o.getBiome(), 0));
 	}
 
 	public void addToSpawnedChests(LootChest c, int amount) {
 		this.addToSpawnedChestsNormalTotal(amount);
 		this.mSpawnedChestsNormal.put(c.getBiome(), amount +
-			this.mSpawnedChestsNormal.getOrDefault(c.getBiome(), 0));
+		                                            this.mSpawnedChestsNormal.getOrDefault(c.getBiome(), 0));
 	}
 
 	public void addToRoomTotal(int amount) {

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.playmonumenta.roguelite.objects.Door;
 import com.playmonumenta.roguelite.objects.Room;
 import java.io.File;
 import java.io.IOException;
@@ -32,27 +31,6 @@ public class Utils {
 			case WEST -> BlockFace.NORTH;
 			default -> BlockFace.SELF;
 		};
-	}
-
-	public static Door getRandomDoorFromWeightedList(List<Door> list) {
-		// Compute total weight
-		double totalWeight = 0.0d;
-		for (Door d : list) {
-			totalWeight += d.getParentRoom().getWeight();
-		}
-		// Get a random
-		int randomIndex = -1;
-		double random = Math.random() * totalWeight;
-		// Select
-		for (int i = 0; i < list.size(); i++) {
-			random -= list.get(i).getParentRoom().getWeight();
-			if (random <= 0.0d) {
-				randomIndex = i;
-				break;
-			}
-		}
-
-		return list.get(randomIndex);
 	}
 
 	public static void shuffleRoomsByWeight(List<Room> list) {

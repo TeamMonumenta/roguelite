@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
@@ -102,6 +103,15 @@ public class LayoutManager implements Listener {
 				});
 			}
 		});
+	}
+
+	/**
+	 * Blocking test method for getting layout stats; do not run on main thread, do not run on play
+	 * @return A valid layout
+	 * @throws InterruptedException If interrupted while waiting for a layout to be available
+	 */
+	public DungeonLayout getLayoutTest() throws InterruptedException {
+		return mPregeneratedQueue.poll(1, TimeUnit.MINUTES);
 	}
 
 	public void restartGeneration(boolean cancelExisting) {
@@ -205,6 +215,7 @@ public class LayoutManager implements Listener {
 						);
 
 						if (!mPregeneratedQueue.offer(buildLayout(builder))) {
+							mLogger.log(Level.INFO, "[LayoutManager] Pre-generated layout queue is full (%d), shutting down", mPregeneratedQueue.size());
 							cancel();
 							return;
 						}

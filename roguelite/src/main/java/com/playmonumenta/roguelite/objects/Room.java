@@ -223,10 +223,7 @@ public class Room {
 
 	public void setLocation(Location location) {
 		this.mLocation = location;
-	}
-
-	public void setHitbox(Hitbox hitbox) {
-		this.mHitbox = hitbox;
+		this.mHitbox = new Hitbox(this);
 	}
 
 	public void setWeight(int weight) {

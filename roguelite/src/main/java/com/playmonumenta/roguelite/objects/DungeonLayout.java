@@ -292,6 +292,20 @@ public class DungeonLayout {
 		return mBuildStatus;
 	}
 
+	public void updateStats(Stats stats) {
+		stats.addToSuccessfulDungeonCount(1);
+		for (Room r : mRooms) {
+			stats.addToRoomDistribution(r, 1);
+		}
+		stats.addToUnusedChestsTotal(mUnselectedChests.size());
+		for (Objective o : mChestsReplacingObjectives) {
+			stats.addToSpawnedChests(o, 1);
+		}
+		for (LootChest c : mSelectedChests) {
+			stats.addToSpawnedChests(c, 1);
+		}
+	}
+
 	/**
 	 * Attempts to place the generated layout
 	 * @return a future to indicate when the instance has finished being placed

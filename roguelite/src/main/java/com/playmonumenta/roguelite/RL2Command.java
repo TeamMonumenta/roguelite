@@ -1,6 +1,5 @@
 package com.playmonumenta.roguelite;
 
-import com.playmonumenta.roguelite.objects.Dungeon;
 import com.playmonumenta.roguelite.objects.DungeonReader;
 import com.playmonumenta.roguelite.objects.Room;
 import dev.jorel.commandapi.CommandAPI;
@@ -45,11 +44,7 @@ public class RL2Command {
 			.executes((sender, args) -> {
 				accessCheck(sender);
 				Location loc = getSenderLocation(sender);
-				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.mPlugin, () -> {
-					Dungeon dungeon = new Dungeon(this.mRooms, loc, this.mPlugin, true);
-					dungeon.calculateWithRetries(5);
-					dungeon.spawn();
-				});
+				LayoutManager.getInstance().applyLayout(loc.getWorld());
 			});
 
 		StringArgument roomIdArg = new StringArgument("Room ID");
@@ -92,9 +87,8 @@ public class RL2Command {
 					));
 				}
 
-				Location loc = getSenderLocation(sender);
 				Bukkit.getServer().getScheduler().runTaskAsynchronously(this.mPlugin, () -> {
-					DungeonReader reader = new DungeonReader(this.mRooms, this.mPlugin, sender, loc);
+					DungeonReader reader = new DungeonReader(this.mPlugin, sender);
 					reader.read(runCount);
 					reader.output();
 				});

@@ -16,7 +16,6 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.util.Vector;
 
 public class LootChest extends RoomObject {
-
 	// Basic constructor with default values
 	public LootChest() {
 		super();
