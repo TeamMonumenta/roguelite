@@ -140,6 +140,20 @@ public class Room {
 
 	// Methods
 
+	public void setContentLocations() {
+		for (Objective o : mObjectiveList) {
+			o.setLocation(mLocation.clone().add(o.getRelPos()));
+		}
+
+		for (LootChest c : mLootChestList) {
+			c.setLocation(mLocation.clone().add(c.getRelPos()));
+		}
+
+		for (Door d : mDoorList) {
+			d.setLocation(mLocation.clone().add(d.getRelPos()));
+		}
+	}
+
 	public JsonObject toJsonObject() {
 		JsonObject room = new JsonObject();
 		JsonObject size = new JsonObject();

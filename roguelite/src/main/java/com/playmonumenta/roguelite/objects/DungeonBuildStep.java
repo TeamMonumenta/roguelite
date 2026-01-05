@@ -128,14 +128,9 @@ public final class DungeonBuildStep {
 			mDstDoor = dstDoor;
 			DungeonBuildStep nextStep = new DungeonBuildStep(this);
 			mDungeonBuilder.mBuildStack.add(nextStep);
-		}
 
-		// The room's position appears valid so far; adjust the positions of the contents of the room to match
-		for (Objective o : dstRoom.getObjectiveList()) {
-			o.setLocation(pos.clone().add(o.getRelPos()));
-		}
-		for (LootChest c : dstRoom.getLootChestList()) {
-			c.setLocation(pos.clone().add(c.getRelPos()));
+			// Since the room's position appears valid so far, adjust the positions of the contents of the room to match
+			dstRoom.setContentLocations();
 		}
 
 		return false;
