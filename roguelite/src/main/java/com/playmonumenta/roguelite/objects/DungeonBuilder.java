@@ -1,6 +1,8 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.playmonumenta.roguelite.Utils;
 import com.playmonumenta.roguelite.enums.Biome;
+import com.playmonumenta.roguelite.enums.Config;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class DungeonBuilder {
 	Plugin mPlugin;
@@ -17,6 +20,10 @@ public class DungeonBuilder {
 	Location mCenterLoc;
 	public final List<DungeonBuildStep> mBuildStack = new ArrayList<>();
 	public final List<Hitbox> mDungeonWalls;
+	private final List<Objective> mSelectedObjectives = new ArrayList<>();
+	private final List<Objective> mObjectivePotentialSpawnPoints = new ArrayList<>();
+	private final List<LootChest> mSelectedLootChests = new ArrayList<>();
+	private final List<LootChest> mLootChestPotentialSpawnPoints = new ArrayList<>();
 
 	public DungeonBuilder(Plugin plugin, boolean directLog, Location cl, List<Room> roomPoolMaster) {
 		mPlugin = plugin;
@@ -41,13 +48,26 @@ public class DungeonBuilder {
 		mBuildStack.add(firstStep);
 	}
 
-	public boolean tryBuildStep() throws NoSuchElementException {
+	public @Nullable DungeonLayout tryBuildStep() throws NoSuchElementException {
 		try {
-			return mBuildStack.getLast().tryBuildStep();
+			boolean success = mBuildStack.getLast().tryBuildStep();
+			if (success) {
+				// Valid instance generated; select chests while still running async, will apply later
+				selectObjectivesAndChests();
+				return new DungeonLayout(
+					mDirectLog,
+					mCenterLoc,
+					selectedRooms(),
+					mSelectedObjectives,
+					mObjectivePotentialSpawnPoints,
+					mSelectedLootChests,
+					mLootChestPotentialSpawnPoints
+				);
+			}
 		} catch (NoSuchElementException ex) {
 			mBuildStack.removeLast();
-			return false;
 		}
+		return null;
 	}
 
 	public List<Room> selectedRooms() {
@@ -61,5 +81,31 @@ public class DungeonBuilder {
 		List<Hitbox> result = new ArrayList<>(mDungeonWalls);
 		result.addAll(selectedRooms().stream().map(Room::getHitbox).toList());
 		return result;
+	}
+
+	public void selectObjectivesAndChests() {
+		// Reset in case builder is re-used
+		mSelectedObjectives.clear();
+		mObjectivePotentialSpawnPoints.clear();
+		mSelectedLootChests.clear();
+		mLootChestPotentialSpawnPoints.clear();
+
+		for (Room room : selectedRooms()) {
+			// Add objectives and chests (positions adjusted earlier)
+			mObjectivePotentialSpawnPoints.addAll(room.getObjectiveList());
+			mLootChestPotentialSpawnPoints.addAll(room.getLootChestList());
+		}
+
+		// Select objectives
+		for (int i = 0; i < 3; i++) {
+			mSelectedObjectives.add(Utils.removeRandomElement(mObjectivePotentialSpawnPoints));
+		}
+
+		// All remaining objective potential spawn locations will always be chests;
+		// there are always fewer of these than the desired final chest count
+		int amountToSpawn = Config.CHEST_COUNT - mObjectivePotentialSpawnPoints.size();
+		for (int i = 0; i < amountToSpawn; i++) {
+			mSelectedLootChests.add(Utils.removeRandomElement(mLootChestPotentialSpawnPoints));
+		}
 	}
 }

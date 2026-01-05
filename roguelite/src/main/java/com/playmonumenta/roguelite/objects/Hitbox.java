@@ -1,39 +1,65 @@
 package com.playmonumenta.roguelite.objects;
 
+import com.playmonumenta.roguelite.Utils;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.Axis;
 import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 public class Hitbox {
-	private final Vector mPos1;
-	private final Vector mPos2;
+	private final BoundingBox mBb;
 
 	public Hitbox(Location p1, Location p2) {
-		this.mPos1 = new Vector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ());
-		this.mPos2 = new Vector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ());
+		Vector pos1 = new Vector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ());
+		Vector pos2 = new Vector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ());
+		mBb = BoundingBox.of(pos1, pos2);
 	}
 
 	public Hitbox(Hitbox old) {
-		this.mPos1 = old.mPos1.clone();
-		this.mPos2 = old.mPos2.clone();
+		mBb = old.mBb.clone();
 	}
 
 	public Hitbox(Room r) {
-		this.mPos1 = new Vector(r.getLocation().getBlockX(), r.getLocation().getBlockY(), r.getLocation().getBlockZ());
+		Vector pos1 = new Vector(r.getLocation().getBlockX(), r.getLocation().getBlockY(), r.getLocation().getBlockZ());
 		Location tmp = r.getLocation().clone().add(r.getSize());
-		this.mPos2 = new Vector(tmp.getBlockX(), tmp.getBlockY(), tmp.getBlockZ());
+		Vector pos2 = new Vector(tmp.getBlockX(), tmp.getBlockY(), tmp.getBlockZ());
+		mBb = BoundingBox.of(pos1, pos2);
 	}
 
 	public boolean collidesWith(Hitbox other) {
-		// Test collision between the two hitboxes
-		return (this.mPos1.getBlockX() + 1 <= other.mPos2.getBlockX() && this.mPos2.getBlockX() - 1 >= other.mPos1.getBlockX()) &&
-			(this.mPos1.getBlockY() + 1 <= other.mPos2.getBlockY() && this.mPos2.getBlockY() - 1 >= other.mPos1.getBlockY()) &&
-			(this.mPos1.getBlockZ() + 1 <= other.mPos2.getBlockZ() && this.mPos2.getBlockZ() - 1 >= other.mPos1.getBlockZ());
+		return mBb.contains(other.mBb);
+	}
+
+	public boolean contains(Vector vector) {
+		return mBb.contains(vector);
+	}
+
+	public List<Long> subChunkVectors(Vector dungeonMinCorner) {
+		Vector min = mBb.getMin();
+		Vector max = mBb.getMax();
+
+		long minX = Utils.subChunkCoordKey(dungeonMinCorner, min, Axis.X);
+		long minY = Utils.subChunkCoordKey(dungeonMinCorner, min, Axis.Y);
+		long minZ = Utils.subChunkCoordKey(dungeonMinCorner, min, Axis.Z);
+		long maxX = Utils.subChunkCoordKey(dungeonMinCorner, max, Axis.X);
+		long maxY = Utils.subChunkCoordKey(dungeonMinCorner, max, Axis.Y);
+		long maxZ = Utils.subChunkCoordKey(dungeonMinCorner, max, Axis.Z);
+
+		List<Long> result = new ArrayList<>();
+		for (long x = minX; x <= maxX; x++) {
+			for (long y = minY; y <= maxY; y++) {
+				for (long z = minZ; z <= maxZ; z++) {
+					result.add(Utils.subChunkKey(x, y, z));
+				}
+			}
+		}
+		return result;
 	}
 
 	public Hitbox incToPostPlacing() {
-		Vector v = new Vector(2, 0, 2);
-		this.mPos1.subtract(v);
-		this.mPos2.add(v);
+		mBb.expand(2, 0, 2);
 		return this;
 	}
 }

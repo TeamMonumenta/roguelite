@@ -457,7 +457,7 @@ public class Dungeon {
 		this.directLog("Spawning " + rooms.size() + " rooms of type " + rooms.get(0).getType().name());
 		List<CompletableFuture<Void>> futures = new ArrayList<>(rooms.size());
 		for (Room r : rooms) {
-			futures.add(r.loadStructureAsync());
+			futures.add(r.loadAndPasteAsync());
 			try {
 				Thread.sleep(25);
 			} catch (Exception ignored) {

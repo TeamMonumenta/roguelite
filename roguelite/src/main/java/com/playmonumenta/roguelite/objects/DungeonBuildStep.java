@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.jetbrains.annotations.Nullable;
 
@@ -95,9 +96,11 @@ public final class DungeonBuildStep {
 			throw new NoSuchElementException("No valid rooms?");
 		}
 
+		Location pos = mSrcDoor.getLocation();
+
 		Room dstRoom = mRemainingDestRoomsThisStep.getFirst();
 		Door dstDoor = mValidDestDoorsThisStep.getOrDefault(dstRoom, new ArrayList<>()).removeFirst();
-		dstRoom.setLocation(mSrcDoor.getLocation().clone().subtract(dstDoor.getRelPos()));
+		dstRoom.setLocation(pos.clone().subtract(dstDoor.getRelPos()));
 		Hitbox dstHitbox = dstRoom.getHitbox();
 
 		if (mDungeonBuilder.selectedHitboxes().stream().noneMatch(dstHitbox::collidesWith)) {
@@ -105,6 +108,14 @@ public final class DungeonBuildStep {
 			mDstDoor = dstDoor;
 			DungeonBuildStep nextStep = new DungeonBuildStep(this);
 			mDungeonBuilder.mBuildStack.add(nextStep);
+		}
+
+		// The room's position appears valid so far; adjust the positions of the contents of the room to match
+		for (Objective o : dstRoom.getObjectiveList()) {
+			o.setLocation(pos.clone().add(o.getRelPos()));
+		}
+		for (LootChest c : dstRoom.getLootChestList()) {
+			c.setLocation(pos.clone().add(c.getRelPos()));
 		}
 
 		return false;

@@ -96,7 +96,7 @@ public class Room {
 		return this.mLootChestList;
 	}
 
-	public CompletableFuture<Void> loadStructureAsync() {
+	public CompletableFuture<Void> loadAndPasteAsync() {
 		return StructuresAPI.loadAndPasteStructure(this.mPath, this.mLocation, true, false);
 	}
 
