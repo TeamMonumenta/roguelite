@@ -32,6 +32,7 @@ public class DungeonLayout {
 	boolean mDirectLog;
 	private final Location mCenterLoc;
 	private final Vector mMinCorner;
+	private final Vector mSize;
 	// true if visited
 	private final List<Room> mRoomsVisited = new ArrayList<>();
 	// Minimize how many rooms need to be checked for a given location
@@ -56,6 +57,7 @@ public class DungeonLayout {
 		mDirectLog = directLog;
 		mCenterLoc = centerLoc;
 		mMinCorner = centerLoc.clone().add(-131, -89, -136).toVector();
+		mSize = new Vector(263, 255, 263);
 
 		for (Room room : rooms) {
 			mRoomsVisited.add(room);
@@ -108,6 +110,10 @@ public class DungeonLayout {
 			minCorner.get("x") instanceof JsonPrimitive minX && minX.isNumber() &&
 			minCorner.get("y") instanceof JsonPrimitive minY && minY.isNumber() &&
 			minCorner.get("z") instanceof JsonPrimitive minZ && minZ.isNumber() &&
+			data.get("size") instanceof JsonObject size &&
+			size.get("x") instanceof JsonPrimitive sizeX && sizeX.isNumber() &&
+			size.get("y") instanceof JsonPrimitive sizeY && sizeY.isNumber() &&
+			size.get("z") instanceof JsonPrimitive sizeZ && sizeZ.isNumber() &&
 			data.get("roomsVisited") instanceof JsonArray roomsVisited &&
 			data.get("objectives") instanceof JsonArray objectives &&
 			data.get("chestsReplacingObjectives") instanceof JsonArray chestsReplacingObjectives &&
@@ -121,6 +127,7 @@ public class DungeonLayout {
 			mCenterLoc = new Location(world, centerX.getAsInt(), centerY.getAsInt(), centerZ.getAsInt());
 
 			mMinCorner = new Vector(minX.getAsInt(), minY.getAsInt(), minZ.getAsInt());
+			mSize = new Vector(sizeX.getAsInt(), sizeY.getAsInt(), sizeZ.getAsInt());
 
 			for (JsonElement r : roomsVisited) {
 				mRoomsVisited.add(new Room(r));
@@ -165,6 +172,12 @@ public class DungeonLayout {
 		minCorner.addProperty("y", mMinCorner.getBlockY());
 		minCorner.addProperty("z", mMinCorner.getBlockZ());
 		layout.add("minCorner", minCorner);
+
+		JsonObject size = new JsonObject();
+		size.addProperty("x", mSize.getBlockX());
+		size.addProperty("y", mSize.getBlockY());
+		size.addProperty("z", mSize.getBlockZ());
+		layout.add("size", size);
 
 		JsonArray roomsVisited = new JsonArray();
 		for (Room room : mRoomsVisited) {
