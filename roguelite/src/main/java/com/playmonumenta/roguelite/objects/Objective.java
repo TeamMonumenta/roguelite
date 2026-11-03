@@ -29,6 +29,10 @@ public class Objective extends RoomObject {
 		Location loc = this.getLocation().clone().add(0.5, 1, 0.5);
 		this.getLocation().getBlock().setType(Material.AIR);
 		loc.getWorld().spawn(loc, EnderCrystal.class);
+		// usb: hack to keep crystals loaded for mechs
+		loc.getWorld().getChunkAtAsync(loc, false, (c) -> {
+			c.setForceLoaded(true);
+		});
 	}
 
 	public void spawnChest() {
