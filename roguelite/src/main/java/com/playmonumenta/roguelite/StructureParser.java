@@ -8,10 +8,14 @@ import com.playmonumenta.roguelite.objects.LootChest;
 import com.playmonumenta.roguelite.objects.Objective;
 import com.playmonumenta.roguelite.objects.Room;
 import com.playmonumenta.structures.StructuresAPI;
+import com.playmonumenta.structures.utils.CommandUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
@@ -72,6 +76,15 @@ public class StructureParser {
 			} else {
 				// Completed successfully
 				this.mRoom.setPath(path);
+
+				long modifyTime;
+				try {
+					modifyTime = Files.getLastModifiedTime(Path.of(CommandUtils.getSchematicPath(Main.getInstance(), path))).to(TimeUnit.SECONDS);
+				} catch (Exception ignored) {
+					modifyTime = 0L;
+				}
+				this.mRoom.setModifyTime(modifyTime);
+
 				String filePath = this.mPlugin.getDataFolder().getPath() + "/rooms/" + this.mFullRoomName + ".json";
 				File f = new File(filePath);
 				f.getParentFile().mkdirs();
